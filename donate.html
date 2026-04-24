@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate - DANDI CONCERNED CITIZEN INITIATIVES</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+   <a href="index.html" class="logo">
+  <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
+  <span>DANDI CCI</span>
+
+  <nav id="navMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="programs.html">Programs</a>
+    <a href="donate.html">Donate</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+</header>
+
+<section class="hero" style="background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url('https://i.imgur.com/LQar60u.jpeg') center/cover;">
+  <div class="hero-content">
+    <h1>Make a Donation</h1>
+    <p>Your gift helps us provide education, food, healthcare, and hope to people in need.</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Choose Donation Amount</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h3>₦5,000</h3>
+      <p>Helps provide school materials for a child.</p>
+      <a href="#bank-details" class="btn">Donate</a>
+    </div>
+
+    <div class="card">
+      <h3>₦10,000</h3>
+      <p>Supports food packages for families.</p>
+      <a href="#bank-details" class="btn">Donate</a>
+    </div>
+
+    <div class="card">
+      <h3>₦25,000</h3>
+      <p>Supports healthcare outreach and community aid.</p>
+      <a href="#bank-details" class="btn">Donate</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="bank-details">
+  <h2>Bank Transfer Details</h2>
+
+  <div class="card" style="max-width: 600px; margin: auto; text-align: left;">
+    <p><strong>Bank Name:</strong> Your Bank Name</p>
+    <p><strong>Account Name:</strong> Hope Foundation NGO</p>
+    <p><strong>Account Number:</strong> 0000000000</p>
+    <p><strong>Reference:</strong> Donation</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Donation Form</h2>
+
+  <form class="contact-form">
+    <input type="text" placeholder="Full Name" required>
+    <input type="email" placeholder="Email Address" required>
+    <input type="text" placeholder="Donation Amount" required>
+    <textarea placeholder="Message / Purpose of Donation"></textarea>
+    <button type="submit" class="btn">Submit Donation Info</button>
+  </form>
+</section>
+
+<section class="donate-banner">
+  <h2>Thank You for Supporting Our Mission</h2>
+  <p>Together, we can change more lives and build stronger communities.</p>
+  <a href="contact.html" class="btn">Contact Us</a>
+</section>
+
+<footer class="footer">
+  <h3>Dandi Concerned Citizen Initiatives</h3>
+  <p>Email: dandiconcernedcitizenscci@gmail.com</p>
+  <p>Phone: +234 806 318 2224</p>
+  <p>&copy; 2026 Dandi Concerned Citizen Initiatives. All Rights Reserved.</p>
+</footer>
+<a href="#" id="openWhatsapp" class="whatsapp">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<div class="wa-popup" id="waPopup">
+  <div class="wa-box">
+    <button class="wa-close" id="closeWhatsapp">&times;</button>
+    <h3>Chat With Us</h3>
+    <p>Enter your name to continue on WhatsApp.</p>
+
+    <input type="text" id="waName" placeholder="Your name">
+
+    <button id="startWhatsapp" class="wa-btn">Start Chat</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
