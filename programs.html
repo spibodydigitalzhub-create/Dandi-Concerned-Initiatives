@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Programs - DANDI CONCERNED CITIZEN INITIATIVES</title>
+  <title>Programs - Dandi Concerned Citizen Initiatives</title>
+
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <header class="header">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <a href="index.html" class="logo">
-  <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
-  <span>DANDI CCI</span>
+  <a href="index.html" class="logo">
+    <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Dandi CCI Logo">
+    <span>DANDI CCI</span>
+  </a>
 
   <nav id="navMenu">
     <a href="index.html">Home</a>
@@ -25,7 +27,6 @@
   <button class="menu-btn" onclick="toggleMenu()">☰</button>
 </header>
 
-<!-- HERO -->
 <section class="hero" style="background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url('https://i.imgur.com/ucL9wet.jpeg') center/cover;">
   <div class="hero-content">
     <h1>Our Programs</h1>
@@ -33,14 +34,22 @@
   </div>
 </section>
 
-<!-- PROGRAMS LIST -->
 <section class="section">
   <h2>What We Do</h2>
 
   <div class="cards">
 
     <div class="card">
-      <img src="https://i.imgur.com/kJIgGdp.jpeg" style="width:100%; border-radius:10px;">
+      <img src="https://i.imgur.com/ucL9wet.jpeg" alt="Conflict Resolution and Security Sensitization">
+      <h3>Conflict Resolution & Security Sensitization</h3>
+      <p>
+        We promote peace, unity, and security awareness through community sensitization programs.
+        Our goal is to help prevent conflict, encourage peaceful living, and support safer communities.
+      </p>
+    </div>
+
+    <div class="card">
+      <img src="https://i.imgur.com/kJIgGdp.jpeg" alt="Education Support">
       <h3>Education Support</h3>
       <p>
         We provide school supplies, scholarships, and mentorship programs to help children stay in school and succeed.
@@ -48,7 +57,7 @@
     </div>
 
     <div class="card">
-      <img src="https://i.imgur.com/YfDBtr8.jpeg" style="width:100%; border-radius:10px;">
+      <img src="https://i.imgur.com/YfDBtr8.jpeg" alt="Food Distribution">
       <h3>Food Distribution</h3>
       <p>
         Our team distributes food packages to families facing hardship and hunger in underserved communities.
@@ -56,7 +65,7 @@
     </div>
 
     <div class="card">
-      <img src="https://i.imgur.com/LMaQK9j.jpeg" style="width:100%; border-radius:10px;">
+      <img src="https://i.imgur.com/LMaQK9j.jpeg" alt="Healthcare Outreach">
       <h3>Healthcare Outreach</h3>
       <p>
         We organize medical outreach programs, providing basic healthcare services and awareness campaigns.
@@ -64,7 +73,7 @@
     </div>
 
     <div class="card">
-      <img src="https://i.imgur.com/3WaMIua.jpeg" style="width:100%; border-radius:10px;">
+      <img src="https://i.imgur.com/3WaMIua.jpeg" alt="Women Empowerment">
       <h3>Women Empowerment</h3>
       <p>
         We support women with skills training and small business opportunities to become financially independent.
@@ -72,7 +81,7 @@
     </div>
 
     <div class="card">
-      <img src="https://i.imgur.com/mdO03a0.jpeg" style="width:100%; border-radius:10px;">
+      <img src="https://i.imgur.com/mdO03a0.jpeg" alt="Youth Development">
       <h3>Youth Development</h3>
       <p>
         We run programs that build leadership, digital skills, and career opportunities for young people.
@@ -80,7 +89,7 @@
     </div>
 
     <div class="card">
-      <img src="https://i.imgur.com/gZo1EG6.jpeg" style="width:100%; border-radius:10px;">
+      <img src="https://i.imgur.com/gZo1EG6.jpeg" alt="Community Projects">
       <h3>Community Projects</h3>
       <p>
         We carry out projects like clean water supply, sanitation, and infrastructure development.
@@ -90,20 +99,19 @@
   </div>
 </section>
 
-<!-- CTA -->
 <section class="donate-banner">
   <h2>Support Our Programs</h2>
   <p>Your donation helps us continue these life-changing projects</p>
   <a href="donate.html" class="btn">Donate Now</a>
 </section>
 
-<!-- FOOTER -->
 <footer class="footer">
   <h3>Dandi Concerned Citizen Initiatives</h3>
   <p>Email: dandiconcernedcitizenscci@gmail.com</p>
   <p>Phone: +234 806 318 2224</p>
   <p>&copy; 2026 Dandi Concerned Citizen Initiatives. All Rights Reserved.</p>
 </footer>
+
 <a href="#" id="openWhatsapp" class="whatsapp">
   <i class="fab fa-whatsapp"></i>
 </a>
@@ -113,9 +121,7 @@
     <button class="wa-close" id="closeWhatsapp">&times;</button>
     <h3>Chat With Us</h3>
     <p>Enter your name to continue on WhatsApp.</p>
-
     <input type="text" id="waName" placeholder="Your name">
-
     <button id="startWhatsapp" class="wa-btn">Start Chat</button>
   </div>
 </div>
