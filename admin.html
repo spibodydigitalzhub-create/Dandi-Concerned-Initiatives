@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DANDI CCI Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    .container { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h2 { color: #0b5d3b; text-align: center; margin-top: 0; }
+    input, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+    button { background: #0b5d3b; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+    button:hover { background: #f4a261; }
+    .hidden { display: none; }
+    #status { text-align: center; margin-top: 15px; font-weight: bold; min-height: 24px; }
+    .logout-btn { background: #dc3545; margin-top: 20px; }
+    .logout-btn:hover { background: #c82333; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>DANDI CCI Admin</h2>
+    
+    <!-- Login Form -->
+    <div id="loginSection">
+      <input type="email" id="email" placeholder="Admin Email">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Upload Form (Hidden until logged in) -->
+    <div id="uploadSection" class="hidden">
+      <h3>Upload New Activity</h3>
+      <input type="text" id="actTitle" placeholder="Activity Title (e.g., Sallah Outreach)">
+      <textarea id="actDesc" placeholder="Short description of the activity" rows="3"></textarea>
+      <input type="file" id="actImage" accept="image/*">
+      <button onclick="uploadActivity()">Upload to Website</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+      <p id="status"></p>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    // YOUR EXACT FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSyBowHTWBRUJlYJESKNzCUKwHbIFcBiu-Xc",
+      authDomain: "dandi-cci.firebaseapp.com",
+      projectId: "dandi-cci",
+      storageBucket: "dandi-cci.firebasestorage.app",
+      messagingSenderId: "725172631759",
+      appId: "1:725172631759:web:42d584c0650f8e0d545fba"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Login Function
+    window.login = () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const status = document.getElementById('status');
+      status.innerText = "Logging in...";
+      
+      signInWithEmailAndPassword(auth, email, password)
+        .catch(error => {
+          status.innerText = "Login failed: " + error.message;
+          status.style.color = "red";
+        });
+    };
+
+    // Logout Function
+    window.logout = () => {
+      signOut(auth);
+      document.getElementById('status').innerText = "";
+    };
+
+    // Check if logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('uploadSection').classList.remove('hidden');
+        document.getElementById('status').innerText = "✅ Logged in successfully!";
+        document.getElementById('status').style.color = "green";
+      } else {
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('uploadSection').classList.add('hidden');
+      }
+    });
+
+    // Upload Function
+    window.uploadActivity = async () => {
+      const title = document.getElementById('actTitle').value;
+      const desc = document.getElementById('actDesc').value;
+      const file = document.getElementById('actImage').files[0];
+      const status = document.getElementById('status');
+
+      if (!title || !desc || !file) {
+        alert("Please fill all fields and select an image.");
+        return;
+      }
+
+      status.innerText = "Uploading image... Please wait.";
+      status.style.color = "blue";
+
+      try {
+        // 1. Upload image to Firebase Storage
+        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + file.name);
+        await uploadBytes(storageRef, file);
+        const imageUrl = await getDownloadURL(storageRef);
+
+        // 2. Save text and image link to Database
+        await addDoc(collection(db, "activities"), {
+          title: title,
+          description: desc,
+          imageUrl: imageUrl,
+          date: new Date().toISOString()
+        });
+
+        status.innerText = "✅ Success! Activity added to website.";
+        status.style.color = "green";
+        
+        // Clear form
+        document.getElementById('actTitle').value = "";
+        document.getElementById('actDesc').value = "";
+        document.getElementById('actImage').value = "";
+      } catch (error) {
+        status.innerText = "❌ Error: " + error.message;
+        status.style.color = "red";
+      }
+    };
+  </script>
+</body>
+  </html>
