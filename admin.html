@@ -2,55 +2,158 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>DANDI CCI Admin Dashboard</title>
   <style>
-    :root { --primary: #0b5d3b; --secondary: #f4a261; --bg: #f4f6f8; --text: #333; --danger: #dc3545; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
-    
-    /* Login Screen */
-    #login-screen { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .login-box { background: white; padding: 40px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; }
-    .login-box h2 { color: var(--primary); margin-bottom: 20px; }
-    .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-    .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    :root {
+      --primary: #0b5d3b;
+      --primary-dark: #08422a;
+      --secondary: #f4a261;
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --border: #e1e4e8;
+    }
 
-    /* Sidebar */
-    .sidebar { width: 250px; background: #1a1a1a; color: white; padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100%; overflow-y: auto; }
-    .sidebar h2 { color: var(--secondary); margin-bottom: 30px; font-size: 20px; text-align: center; }
-    .nav-item { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-    .nav-item:hover, .nav-item.active { background: var(--primary); }
-    .logout-btn { margin-top: auto; background: var(--danger); text-align: center; justify-content: center; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* --- LOGIN SCREEN --- */
+    #login-screen {
+      position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+    }
+    .login-box {
+      background: white; padding: 40px 30px; border-radius: 16px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center;
+    }
+    .login-box h2 { color: var(--primary); margin-bottom: 10px; font-size: 24px; }
+    .login-box p { color: var(--text-light); margin-bottom: 30px; font-size: 14px; }
+    .login-box input {
+      width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 16px; background: #f8f9fa; transition: 0.3s;
+    }
+    .login-box input:focus { outline: none; border-color: var(--primary); background: white; }
+    .login-box button {
+      width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
+      border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s;
+    }
+    .login-box button:hover { background: var(--primary-dark); }
+    #login-error { color: var(--danger); margin-top: 15px; font-size: 14px; min-height: 20px; }
+
+    /* --- MAIN APP LAYOUT --- */
+    #app-container { display: none; flex-direction: column; min-height: 100vh; }
+
+    /* Top Header */
+    .top-header {
+      background: var(--primary); color: white; padding: 15px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+    }
+    .top-header h1 { font-size: 18px; font-weight: 600; }
+    .logout-btn {
+      background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px;
+      border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.3); }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      background: white; display: flex; overflow-x: auto; padding: 0 10px;
+      border-bottom: 1px solid var(--border); position: sticky; top: 56px; z-index: 99;
+      scrollbar-width: none; /* Firefox */
+    }
+    .nav-tabs::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+    .nav-tab {
+      padding: 15px 20px; white-space: nowrap; cursor: pointer; font-size: 14px;
+      font-weight: 500; color: var(--text-light); border-bottom: 3px solid transparent;
+      transition: 0.3s;
+    }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
 
     /* Main Content */
-    .main-content { margin-left: 250px; padding: 30px; width: 100%; }
-    .view { display: none; }
+    .main-content { padding: 20px; max-width: 1000px; margin: 0 auto; width: 100%; }
+    .view { display: none; animation: fadeIn 0.3s ease; }
     .view.active { display: block; }
-    h1 { color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Cards & Forms */
-    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-    .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .stat-card h3 { font-size: 32px; color: var(--primary); }
-    
-    input, textarea, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
-    button.action-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    button.action-btn:hover { background: var(--secondary); }
-    button.delete-btn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    h2.page-title { color: var(--primary); margin-bottom: 20px; font-size: 22px; }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg); padding: 20px; border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+    }
+    .card h3 { color: var(--text); margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat-card {
+      background: white; padding: 20px; border-radius: 12px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary);
+    }
+    .stat-card h3 { font-size: 28px; color: var(--primary); margin-bottom: 5px; border: none; padding: 0; }
+    .stat-card p { color: var(--text-light); font-size: 13px; font-weight: 500; }
+
+    /* Forms */
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--text); }
+    input[type="text"], input[type="email"], input[type="password"], textarea, select {
+      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 15px; background: #f8f9fa; transition: 0.3s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Custom File Upload */
+    .file-upload-wrapper { position: relative; margin-bottom: 15px; }
+    .file-upload-btn {
+      display: block; width: 100%; padding: 12px; background: #f8f9fa; border: 2px dashed var(--border);
+      border-radius: 8px; text-align: center; cursor: pointer; color: var(--text-light); font-size: 14px;
+    }
+    .file-upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .file-upload-wrapper input[type="file"] {
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
+      border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-danger {
+      background: var(--danger); color: white; border: none; padding: 8px 16px;
+      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+    }
+    .btn-danger:hover { background: #c0392b; }
 
     /* Lists */
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-    .list-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
-    .item-info { display: flex; align-items: center; flex: 1; }
-    .status-msg { margin-top: 10px; font-weight: bold; text-align: center; }
+    .list-item {
+      display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border);
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px; background: #eee; }
+    .item-info { flex: 1; }
+    .item-info strong { display: block; font-size: 15px; margin-bottom: 4px; }
+    .item-info small { color: var(--text-light); font-size: 13px; }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
 
-    @media (max-width: 768px) {
-      .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; overflow-x: auto; padding: 10px; }
-      .sidebar h2 { display: none; }
-      .nav-item { white-space: nowrap; font-size: 14px; padding: 10px; }
-      .main-content { margin-left: 0; padding: 15px; }
+    .status-msg { margin-top: 15px; font-weight: 600; text-align: center; font-size: 14px; min-height: 20px; }
+    .status-success { color: var(--success); }
+    .status-error { color: var(--danger); }
+    .status-loading { color: var(--primary); }
+
+    /* Desktop adjustments */
+    @media (min-width: 768px) {
+      .top-header { padding: 20px 40px; }
+      .main-content { padding: 40px; }
+      .nav-tabs { justify-content: center; }
+      .nav-tab { padding: 20px 30px; font-size: 16px; }
     }
   </style>
 </head>
@@ -60,50 +163,66 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>DANDI CCI Admin</h2>
+      <p>Sign in to manage your website</p>
       <input type="email" id="login-email" placeholder="Email Address">
       <input type="password" id="login-pass" placeholder="Password">
-      <button onclick="handleLogin()">Login</button>
-      <p id="login-error" style="color:red; margin-top:10px;"></p>
+      <button onclick="handleLogin()">Sign In</button>
+      <p id="login-error"></p>
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD (Hidden until logged in) -->
-  <div id="app-container" style="display:none; width:100%;">
-    <aside class="sidebar">
-      <h2>DANDI CCI</h2>
-      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
-      <div class="nav-item" onclick="showView('activities')">️ Activities</div>
-      <div class="nav-item" onclick="showView('programs')"> Programs</div>
-      <div class="nav-item" onclick="showView('team')"> Leadership</div>
-      <div class="nav-item" onclick="showView('settings')">⚙️ Site Settings</div>
-      <div class="nav-item logout-btn" onclick="handleLogout()">🚪 Logout</div>
-    </aside>
+  <!-- MAIN APP -->
+  <div id="app-container">
+    <header class="top-header">
+      <h1>DANDI CCI Dashboard</h1>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </header>
+
+    <nav class="nav-tabs">
+      <div class="nav-tab active" onclick="showView('dashboard', this)">Dashboard</div>
+      <div class="nav-tab" onclick="showView('activities', this)">Activities</div>
+      <div class="nav-tab" onclick="showView('programs', this)">Programs</div>
+      <div class="nav-tab" onclick="showView('team', this)">Team</div>
+      <div class="nav-tab" onclick="showView('settings', this)">Settings</div>
+    </nav>
 
     <main class="main-content">
       
       <!-- DASHBOARD VIEW -->
       <div id="view-dashboard" class="view active">
-        <h1>Dashboard Overview</h1>
+        <h2 class="page-title">Overview</h2>
         <div class="stats-grid">
           <div class="stat-card"><h3 id="stat-act">0</h3><p>Activities</p></div>
           <div class="stat-card"><h3 id="stat-prog">0</h3><p>Programs</p></div>
           <div class="stat-card"><h3 id="stat-team">0</h3><p>Team Members</p></div>
         </div>
-        <div class="card" style="margin-top:20px;">
+        <div class="card">
           <h3>Welcome, Admin!</h3>
-          <p>Use the menu on the left to manage your website content. Changes appear on the live site immediately.</p>
+          <p style="color: var(--text-light); line-height: 1.6;">Use the tabs above to manage your website content. Any changes you make here will appear on the live website immediately.</p>
         </div>
       </div>
 
       <!-- ACTIVITIES VIEW -->
       <div id="view-activities" class="view">
-        <h1>Manage Activities (Gallery)</h1>
+        <h2 class="page-title">Manage Activities</h2>
         <div class="card">
           <h3>Add New Activity</h3>
-          <input type="text" id="act-title" placeholder="Activity Title">
-          <textarea id="act-desc" placeholder="Description" rows="3"></textarea>
-          <input type="file" id="act-file" accept="image/*">
-          <button class="action-btn" onclick="addActivity()">Upload Activity</button>
+          <div class="form-group">
+            <label>Activity Title</label>
+            <input type="text" id="act-title" placeholder="e.g., Sallah Outreach 2024">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="act-desc" placeholder="Brief description of the activity..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Upload Image</label>
+            <div class="file-upload-wrapper">
+              <div class="file-upload-btn" id="act-file-label"> Tap to choose an image</div>
+              <input type="file" id="act-file" accept="image/*" onchange="updateFileLabel('act-file', 'act-file-label')">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addActivity()">Upload Activity</button>
           <p id="act-status" class="status-msg"></p>
         </div>
         <div class="card">
@@ -114,12 +233,18 @@
 
       <!-- PROGRAMS VIEW -->
       <div id="view-programs" class="view">
-        <h1>Manage Programs</h1>
+        <h2 class="page-title">Manage Programs</h2>
         <div class="card">
           <h3>Add New Program</h3>
-          <input type="text" id="prog-title" placeholder="Program Title (e.g., Education Support)">
-          <textarea id="prog-desc" placeholder="Program Description" rows="3"></textarea>
-          <button class="action-btn" onclick="addProgram()">Add Program</button>
+          <div class="form-group">
+            <label>Program Title</label>
+            <input type="text" id="prog-title" placeholder="e.g., Education Support">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="prog-desc" placeholder="Describe the program..."></textarea>
+          </div>
+          <button class="btn-primary" onclick="addProgram()">Add Program</button>
           <p id="prog-status" class="status-msg"></p>
         </div>
         <div class="card">
@@ -130,13 +255,25 @@
 
       <!-- TEAM VIEW -->
       <div id="view-team" class="view">
-        <h1>Manage Leadership Team</h1>
+        <h2 class="page-title">Manage Leadership Team</h2>
         <div class="card">
           <h3>Add Team Member</h3>
-          <input type="text" id="team-name" placeholder="Full Name">
-          <input type="text" id="team-role" placeholder="Role/Position">
-          <input type="file" id="team-file" accept="image/*">
-          <button class="action-btn" onclick="addTeam()">Add Member</button>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="team-name" placeholder="e.g., Amb. Abbas Ibn Saad">
+          </div>
+          <div class="form-group">
+            <label>Role / Position</label>
+            <input type="text" id="team-role" placeholder="e.g., Founder">
+          </div>
+          <div class="form-group">
+            <label>Profile Picture</label>
+            <div class="file-upload-wrapper">
+              <div class="file-upload-btn" id="team-file-label">📁 Tap to choose an image</div>
+              <input type="file" id="team-file" accept="image/*" onchange="updateFileLabel('team-file', 'team-file-label')">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addTeam()">Add Member</button>
           <p id="team-status" class="status-msg"></p>
         </div>
         <div class="card">
@@ -147,18 +284,26 @@
 
       <!-- SETTINGS VIEW -->
       <div id="view-settings" class="view">
-        <h1>Global Site Settings</h1>
+        <h2 class="page-title">Global Site Settings</h2>
         <div class="card">
-          <p style="color:#666; margin-bottom:15px;">Update these to change the contact info across the entire website.</p>
-          <label>Email Address</label>
-          <input type="email" id="set-email">
-          <label>Phone Number</label>
-          <input type="text" id="set-phone">
-          <label>Office Address</label>
-          <textarea id="set-address" rows="3"></textarea>
-          <label>WhatsApp Number (with country code, no +)</label>
-          <input type="text" id="set-wa">
-          <button class="action-btn" onclick="saveSettings()">Save Settings</button>
+          <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">Update these details to change the contact information across your entire website.</p>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="set-email">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="set-phone">
+          </div>
+          <div class="form-group">
+            <label>Office Address</label>
+            <textarea id="set-address" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Number (Country code + number, no + sign)</label>
+            <input type="text" id="set-wa" placeholder="e.g., 2348063182224">
+          </div>
+          <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
           <p id="set-status" class="status-msg"></p>
         </div>
       </div>
@@ -191,8 +336,13 @@
     window.handleLogin = () => {
       const email = document.getElementById('login-email').value;
       const pass = document.getElementById('login-pass').value;
+      const errorEl = document.getElementById('login-error');
+      errorEl.innerText = "Signing in...";
+      errorEl.style.color = "var(--primary)";
+      
       signInWithEmailAndPassword(auth, email, pass).catch(e => {
-        document.getElementById('login-error').innerText = "Invalid login details.";
+        errorEl.innerText = "Invalid email or password.";
+        errorEl.style.color = "var(--danger)";
       });
     };
 
@@ -210,11 +360,22 @@
     });
 
     // --- NAVIGATION ---
-    window.showView = (viewName) => {
+    window.showView = (viewName, tabElement) => {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
       document.getElementById(`view-${viewName}`).classList.add('active');
-      event.currentTarget.classList.add('active');
+      if(tabElement) tabElement.classList.add('active');
+    };
+
+    // Helper for file input label
+    window.updateFileLabel = (inputId, labelId) => {
+      const fileInput = document.getElementById(inputId);
+      const label = document.getElementById(labelId);
+      if (fileInput.files.length > 0) {
+        label.innerText = "✅ " + fileInput.files[0].name;
+        label.style.borderColor = "var(--success)";
+        label.style.color = "var(--success)";
+      }
     };
 
     // --- DATA LOADING ---
@@ -228,19 +389,24 @@
     // 1. ACTIVITIES
     async function loadActivities() {
       const list = document.getElementById('act-list');
-      list.innerHTML = 'Loading...';
+      list.innerHTML = '<div class="empty-state">Loading activities...</div>';
       const snap = await getDocs(query(collection(db, "activities"), orderBy("date", "desc")));
       document.getElementById('stat-act').innerText = snap.size;
       list.innerHTML = '';
+      if(snap.empty) {
+        list.innerHTML = '<div class="empty-state">No activities uploaded yet.</div>';
+        return;
+      }
       snap.forEach(d => {
         const data = d.data();
         list.innerHTML += `
           <div class="list-item">
+            <img src="${data.imageUrl}" alt="${data.title}">
             <div class="item-info">
-              <img src="${data.imageUrl}">
-              <div><strong>${data.title}</strong><br><small>${data.description.substring(0,50)}...</small></div>
+              <strong>${data.title}</strong>
+              <small>${data.description ? data.description.substring(0,60) + '...' : 'No description'}</small>
             </div>
-            <button class="delete-btn" onclick="deleteItem('activities', '${d.id}', '${data.storagePath}')">Delete</button>
+            <button class="btn-danger" onclick="deleteItem('activities', '${d.id}', '${data.storagePath}')">Delete</button>
           </div>`;
       });
     }
@@ -250,17 +416,24 @@
       const desc = document.getElementById('act-desc').value;
       const file = document.getElementById('act-file').files[0];
       const status = document.getElementById('act-status');
-      if(!title || !file) return alert("Title and Image required");
+      if(!title || !file) return alert("Please enter a title and choose an image.");
       
-      status.innerText = "Uploading...";
+      status.innerText = "Uploading image... Please wait.";
+      status.className = "status-msg status-loading";
+      
       const path = `activities/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       
       await addDoc(collection(db, "activities"), { title, description: desc, imageUrl: url, storagePath: path, date: new Date().toISOString() });
-      status.innerText = "✅ Uploaded!";
+      
+      status.innerText = "✅ Activity uploaded successfully!";
+      status.className = "status-msg status-success";
       document.getElementById('act-title').value = ''; document.getElementById('act-desc').value = ''; document.getElementById('act-file').value = '';
+      document.getElementById('act-file-label').innerText = "📁 Tap to choose an image";
+      document.getElementById('act-file-label').style.borderColor = "var(--border)";
+      document.getElementById('act-file-label').style.color = "var(--text-light)";
       loadActivities();
     };
 
@@ -270,12 +443,19 @@
       const snap = await getDocs(collection(db, "programs"));
       document.getElementById('stat-prog').innerText = snap.size;
       list.innerHTML = '';
+      if(snap.empty) {
+        list.innerHTML = '<div class="empty-state">No programs added yet.</div>';
+        return;
+      }
       snap.forEach(d => {
         const data = d.data();
         list.innerHTML += `
           <div class="list-item">
-            <div class="item-info"><div><strong>${data.title}</strong><br><small>${data.description.substring(0,50)}...</small></div></div>
-            <button class="delete-btn" onclick="deleteItem('programs', '${d.id}')">Delete</button>
+            <div class="item-info">
+              <strong>${data.title}</strong>
+              <small>${data.description ? data.description.substring(0,60) + '...' : 'No description'}</small>
+            </div>
+            <button class="btn-danger" onclick="deleteItem('programs', '${d.id}')">Delete</button>
           </div>`;
       });
     }
@@ -283,9 +463,12 @@
     window.addProgram = async () => {
       const title = document.getElementById('prog-title').value;
       const desc = document.getElementById('prog-desc').value;
-      if(!title) return alert("Title required");
+      const status = document.getElementById('prog-status');
+      if(!title) return alert("Please enter a program title.");
+      
       await addDoc(collection(db, "programs"), { title, description: desc });
-      document.getElementById('prog-status').innerText = "✅ Added!";
+      status.innerText = "✅ Program added successfully!";
+      status.className = "status-msg status-success";
       document.getElementById('prog-title').value = ''; document.getElementById('prog-desc').value = '';
       loadPrograms();
     };
@@ -296,15 +479,20 @@
       const snap = await getDocs(collection(db, "team"));
       document.getElementById('stat-team').innerText = snap.size;
       list.innerHTML = '';
+      if(snap.empty) {
+        list.innerHTML = '<div class="empty-state">No team members added yet.</div>';
+        return;
+      }
       snap.forEach(d => {
         const data = d.data();
         list.innerHTML += `
           <div class="list-item">
+            <img src="${data.imageUrl}" alt="${data.name}">
             <div class="item-info">
-              <img src="${data.imageUrl}">
-              <div><strong>${data.name}</strong><br><small>${data.role}</small></div>
+              <strong>${data.name}</strong>
+              <small>${data.role}</small>
             </div>
-            <button class="delete-btn" onclick="deleteItem('team', '${d.id}', '${data.storagePath}')">Delete</button>
+            <button class="btn-danger" onclick="deleteItem('team', '${d.id}', '${data.storagePath}')">Delete</button>
           </div>`;
       });
     }
@@ -314,17 +502,23 @@
       const role = document.getElementById('team-role').value;
       const file = document.getElementById('team-file').files[0];
       const status = document.getElementById('team-status');
-      if(!name || !file) return alert("Name and Image required");
+      if(!name || !file) return alert("Please enter a name and choose an image.");
       
-      status.innerText = "Uploading...";
+      status.innerText = "Uploading image... Please wait.";
+      status.className = "status-msg status-loading";
+      
       const path = `team/${Date.now()}_${file.name}`;
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       
       await addDoc(collection(db, "team"), { name, role, imageUrl: url, storagePath: path });
-      status.innerText = "✅ Added!";
+      status.innerText = "✅ Team member added successfully!";
+      status.className = "status-msg status-success";
       document.getElementById('team-name').value = ''; document.getElementById('team-role').value = ''; document.getElementById('team-file').value = '';
+      document.getElementById('team-file-label').innerText = "📁 Tap to choose an image";
+      document.getElementById('team-file-label').style.borderColor = "var(--border)";
+      document.getElementById('team-file-label').style.color = "var(--text-light)";
       loadTeam();
     };
 
@@ -342,24 +536,30 @@
     }
 
     window.saveSettings = async () => {
+      const status = document.getElementById('set-status');
+      status.innerText = "Saving...";
+      status.className = "status-msg status-loading";
+      
       await setDoc(doc(db, "settings", "general"), {
         email: document.getElementById('set-email').value,
         phone: document.getElementById('set-phone').value,
         address: document.getElementById('set-address').value,
         whatsapp: document.getElementById('set-wa').value
       });
-      document.getElementById('set-status').innerText = "✅ Settings Saved!";
+      status.innerText = "✅ Settings saved successfully!";
+      status.className = "status-msg status-success";
     };
 
     // --- DELETE FUNCTION ---
     window.deleteItem = async (col, id, path) => {
-      if(!confirm("Are you sure?")) return;
+      if(!confirm("Are you sure you want to delete this? This cannot be undone.")) return;
+      
       if(path) {
-        try { await deleteObject(ref(storage, path)); } catch(e){}
+        try { await deleteObject(ref(storage, path)); } catch(e){ console.log("Image delete skipped"); }
       }
       await deleteDoc(doc(db, col, id));
       loadAllData();
     };
   </script>
 </body>
-            </html>
+</html>
