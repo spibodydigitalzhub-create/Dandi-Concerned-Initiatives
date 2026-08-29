@@ -86,6 +86,7 @@
   </div>
 </section>
 
+<!-- DYNAMIC GALLERY SECTION -->
 <section class="section gallery-section">
   <span class="section-tag">Our Activities</span>
   <h2>Our Impact in Action</h2>
@@ -93,28 +94,14 @@
     Moments from our outreach programs, peace initiatives, and community support activities.
   </p>
 
-  <div class="gallery">
-    <img src="https://i.imgur.com/Qdqvlrp.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/WljAMuk.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/YLsVVN1.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/W8HJv1X.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/rKZ57rr.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/VKIMI2A.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/tixZVvH.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/zxDXj3F.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/b8kryTM.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/EulzhCF.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/P3I52jN.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/7CDTiFp.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/nyzGEQY.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/zdezRJp.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/JSeBPkT.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/EGfmlhP.jpeg" alt="Dandi CCI activity">
-    <img src="https://i.imgur.com/UjwSsRr.jpeg" alt="Dandi CCI activity">
+  <!-- This gallery will be filled automatically by Firebase -->
+  <div class="gallery" id="activityGallery">
+    <p style="text-align:center; width:100%;">Loading activities...</p>
   </div>
 </section>
 
-<div id="lightbox" class="lightbox">
+<!-- Lightbox for viewing images -->
+<div id="lightbox" class="lightbox" onclick="this.style.display='none'">
   <img id="lightbox-img" alt="Gallery preview">
 </div>
 
@@ -162,6 +149,106 @@
   </div>
 </div>
 
-<script src="app.js"></script>
+<script>
+// Toggle Mobile Menu
+function toggleMenu() {
+  document.getElementById("navMenu").classList.toggle("active");
+}
+
+// WhatsApp Logic
+const openWhatsapp = document.getElementById("openWhatsapp");
+const closeWhatsapp = document.getElementById("closeWhatsapp");
+const waPopup = document.getElementById("waPopup");
+const startWhatsapp = document.getElementById("startWhatsapp");
+const waName = document.getElementById("waName");
+
+if (openWhatsapp) {
+  openWhatsapp.addEventListener("click", function(e) {
+    e.preventDefault();
+    waPopup.classList.add("active");
+  });
+}
+
+if (closeWhatsapp) {
+  closeWhatsapp.addEventListener("click", function() {
+    waPopup.classList.remove("active");
+  });
+}
+
+if (startWhatsapp) {
+  startWhatsapp.addEventListener("click", function() {
+    const name = waName.value.trim();
+    if (name === "") {
+      waName.style.border = "1px solid red";
+      return;
+    }
+    const phone = "2348063182224"; 
+    const message = `Hello, my name is ${name}. I want to support your NGO.`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+    waPopup.classList.remove("active");
+  });
+}
+</script>
+
+<!-- FIREBASE SCRIPT TO LOAD GALLERY -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // Your Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBowHTWBRUJlYJESKNzCUKwHbIFcBiu-Xc",
+    authDomain: "dandi-cci.firebaseapp.com",
+    projectId: "dandi-cci",
+    storageBucket: "dandi-cci.firebasestorage.app",
+    messagingSenderId: "725172631759",
+    appId: "1:725172631759:web:42d584c0650f8e0d545fba"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function loadActivities() {
+    const gallery = document.getElementById('activityGallery');
+    try {
+      // Fetch activities from database, newest first
+      const q = query(collection(db, "activities"), orderBy("date", "desc"));
+      const querySnapshot = await getDocs(q);
+      
+      gallery.innerHTML = ""; // Clear "Loading..." text
+      
+      if (querySnapshot.empty) {
+        gallery.innerHTML = "<p style='text-align:center; width:100%;'>No activities added yet. Check back soon!</p>";
+        return;
+      }
+
+      // Create an image element for each activity
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const img = document.createElement('img');
+        img.src = data.imageUrl;
+        img.alt = data.title;
+        img.title = data.title; // Shows title on hover
+        
+        // Make image clickable to open lightbox
+        img.style.cursor = "pointer";
+        img.onclick = function() { 
+          document.getElementById('lightbox-img').src = this.src;
+          document.getElementById('lightbox').style.display = 'flex';
+        };
+        
+        gallery.appendChild(img);
+      });
+    } catch (error) {
+      console.error("Error loading activities:", error);
+      gallery.innerHTML = "<p style='text-align:center; width:100%;'>Error loading activities.</p>";
+    }
+  }
+
+  // Run the function when the page loads
+  loadActivities();
+</script>
+
 </body>
-</html>
+  </html>
