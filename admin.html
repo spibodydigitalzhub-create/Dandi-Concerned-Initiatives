@@ -3,52 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DANDI CCI Admin Panel</title>
+  <title>DANDI CCI Admin Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-    .container { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    h2 { color: #0b5d3b; text-align: center; margin-top: 0; }
-    input, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
-    button { background: #0b5d3b; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
-    button:hover { background: #f4a261; }
-    .hidden { display: none; }
-    #status { text-align: center; margin-top: 15px; font-weight: bold; min-height: 24px; }
-    .logout-btn { background: #dc3545; margin-top: 20px; }
-    .logout-btn:hover { background: #c82333; }
+    :root { --primary: #0b5d3b; --secondary: #f4a261; --bg: #f4f6f8; --text: #333; --danger: #dc3545; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    
+    /* Login Screen */
+    #login-screen { position: fixed; inset: 0; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-box { background: white; padding: 40px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; }
+    .login-box h2 { color: var(--primary); margin-bottom: 20px; }
+    .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+    .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+
+    /* Sidebar */
+    .sidebar { width: 250px; background: #1a1a1a; color: white; padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100%; overflow-y: auto; }
+    .sidebar h2 { color: var(--secondary); margin-bottom: 30px; font-size: 20px; text-align: center; }
+    .nav-item { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+    .nav-item:hover, .nav-item.active { background: var(--primary); }
+    .logout-btn { margin-top: auto; background: var(--danger); text-align: center; justify-content: center; }
+
+    /* Main Content */
+    .main-content { margin-left: 250px; padding: 30px; width: 100%; }
+    .view { display: none; }
+    .view.active { display: block; }
+    h1 { color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+
+    /* Cards & Forms */
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .stat-card h3 { font-size: 32px; color: var(--primary); }
+    
+    input, textarea, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
+    button.action-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    button.action-btn:hover { background: var(--secondary); }
+    button.delete-btn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+    /* Lists */
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+    .list-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
+    .item-info { display: flex; align-items: center; flex: 1; }
+    .status-msg { margin-top: 10px; font-weight: bold; text-align: center; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; overflow-x: auto; padding: 10px; }
+      .sidebar h2 { display: none; }
+      .nav-item { white-space: nowrap; font-size: 14px; padding: 10px; }
+      .main-content { margin-left: 0; padding: 15px; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>DANDI CCI Admin</h2>
-    
-    <!-- Login Form -->
-    <div id="loginSection">
-      <input type="email" id="email" placeholder="Admin Email">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="login()">Login</button>
-    </div>
-
-    <!-- Upload Form (Hidden until logged in) -->
-    <div id="uploadSection" class="hidden">
-      <h3>Upload New Activity</h3>
-      <input type="text" id="actTitle" placeholder="Activity Title (e.g., Sallah Outreach)">
-      <textarea id="actDesc" placeholder="Short description of the activity" rows="3"></textarea>
-      <input type="file" id="actImage" accept="image/*">
-      <button onclick="uploadActivity()">Upload to Website</button>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-      <p id="status"></p>
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>DANDI CCI Admin</h2>
+      <input type="email" id="login-email" placeholder="Email Address">
+      <input type="password" id="login-pass" placeholder="Password">
+      <button onclick="handleLogin()">Login</button>
+      <p id="login-error" style="color:red; margin-top:10px;"></p>
     </div>
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- MAIN DASHBOARD (Hidden until logged in) -->
+  <div id="app-container" style="display:none; width:100%;">
+    <aside class="sidebar">
+      <h2>DANDI CCI</h2>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('activities')">️ Activities</div>
+      <div class="nav-item" onclick="showView('programs')"> Programs</div>
+      <div class="nav-item" onclick="showView('team')"> Leadership</div>
+      <div class="nav-item" onclick="showView('settings')">⚙️ Site Settings</div>
+      <div class="nav-item logout-btn" onclick="handleLogout()">🚪 Logout</div>
+    </aside>
+
+    <main class="main-content">
+      
+      <!-- DASHBOARD VIEW -->
+      <div id="view-dashboard" class="view active">
+        <h1>Dashboard Overview</h1>
+        <div class="stats-grid">
+          <div class="stat-card"><h3 id="stat-act">0</h3><p>Activities</p></div>
+          <div class="stat-card"><h3 id="stat-prog">0</h3><p>Programs</p></div>
+          <div class="stat-card"><h3 id="stat-team">0</h3><p>Team Members</p></div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+          <h3>Welcome, Admin!</h3>
+          <p>Use the menu on the left to manage your website content. Changes appear on the live site immediately.</p>
+        </div>
+      </div>
+
+      <!-- ACTIVITIES VIEW -->
+      <div id="view-activities" class="view">
+        <h1>Manage Activities (Gallery)</h1>
+        <div class="card">
+          <h3>Add New Activity</h3>
+          <input type="text" id="act-title" placeholder="Activity Title">
+          <textarea id="act-desc" placeholder="Description" rows="3"></textarea>
+          <input type="file" id="act-file" accept="image/*">
+          <button class="action-btn" onclick="addActivity()">Upload Activity</button>
+          <p id="act-status" class="status-msg"></p>
+        </div>
+        <div class="card">
+          <h3>Existing Activities</h3>
+          <div id="act-list"></div>
+        </div>
+      </div>
+
+      <!-- PROGRAMS VIEW -->
+      <div id="view-programs" class="view">
+        <h1>Manage Programs</h1>
+        <div class="card">
+          <h3>Add New Program</h3>
+          <input type="text" id="prog-title" placeholder="Program Title (e.g., Education Support)">
+          <textarea id="prog-desc" placeholder="Program Description" rows="3"></textarea>
+          <button class="action-btn" onclick="addProgram()">Add Program</button>
+          <p id="prog-status" class="status-msg"></p>
+        </div>
+        <div class="card">
+          <h3>Existing Programs</h3>
+          <div id="prog-list"></div>
+        </div>
+      </div>
+
+      <!-- TEAM VIEW -->
+      <div id="view-team" class="view">
+        <h1>Manage Leadership Team</h1>
+        <div class="card">
+          <h3>Add Team Member</h3>
+          <input type="text" id="team-name" placeholder="Full Name">
+          <input type="text" id="team-role" placeholder="Role/Position">
+          <input type="file" id="team-file" accept="image/*">
+          <button class="action-btn" onclick="addTeam()">Add Member</button>
+          <p id="team-status" class="status-msg"></p>
+        </div>
+        <div class="card">
+          <h3>Current Team</h3>
+          <div id="team-list"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS VIEW -->
+      <div id="view-settings" class="view">
+        <h1>Global Site Settings</h1>
+        <div class="card">
+          <p style="color:#666; margin-bottom:15px;">Update these to change the contact info across the entire website.</p>
+          <label>Email Address</label>
+          <input type="email" id="set-email">
+          <label>Phone Number</label>
+          <input type="text" id="set-phone">
+          <label>Office Address</label>
+          <textarea id="set-address" rows="3"></textarea>
+          <label>WhatsApp Number (with country code, no +)</label>
+          <input type="text" id="set-wa">
+          <button class="action-btn" onclick="saveSettings()">Save Settings</button>
+          <p id="set-status" class="status-msg"></p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- FIREBASE LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    // YOUR EXACT FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBowHTWBRUJlYJESKNzCUKwHbIFcBiu-Xc",
       authDomain: "dandi-cci.firebaseapp.com",
@@ -63,80 +187,179 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // Login Function
-    window.login = () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const status = document.getElementById('status');
-      status.innerText = "Logging in...";
-      
-      signInWithEmailAndPassword(auth, email, password)
-        .catch(error => {
-          status.innerText = "Login failed: " + error.message;
-          status.style.color = "red";
-        });
+    // --- AUTHENTICATION ---
+    window.handleLogin = () => {
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-pass').value;
+      signInWithEmailAndPassword(auth, email, pass).catch(e => {
+        document.getElementById('login-error').innerText = "Invalid login details.";
+      });
     };
 
-    // Logout Function
-    window.logout = () => {
-      signOut(auth);
-      document.getElementById('status').innerText = "";
-    };
+    window.handleLogout = () => signOut(auth);
 
-    // Check if logged in
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        document.getElementById('loginSection').classList.add('hidden');
-        document.getElementById('uploadSection').classList.remove('hidden');
-        document.getElementById('status').innerText = "✅ Logged in successfully!";
-        document.getElementById('status').style.color = "green";
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        loadAllData();
       } else {
-        document.getElementById('loginSection').classList.remove('hidden');
-        document.getElementById('uploadSection').classList.add('hidden');
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
       }
     });
 
-    // Upload Function
-    window.uploadActivity = async () => {
-      const title = document.getElementById('actTitle').value;
-      const desc = document.getElementById('actDesc').value;
-      const file = document.getElementById('actImage').files[0];
-      const status = document.getElementById('status');
+    // --- NAVIGATION ---
+    window.showView = (viewName) => {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`view-${viewName}`).classList.add('active');
+      event.currentTarget.classList.add('active');
+    };
 
-      if (!title || !desc || !file) {
-        alert("Please fill all fields and select an image.");
-        return;
+    // --- DATA LOADING ---
+    async function loadAllData() {
+      loadActivities();
+      loadPrograms();
+      loadTeam();
+      loadSettings();
+    }
+
+    // 1. ACTIVITIES
+    async function loadActivities() {
+      const list = document.getElementById('act-list');
+      list.innerHTML = 'Loading...';
+      const snap = await getDocs(query(collection(db, "activities"), orderBy("date", "desc")));
+      document.getElementById('stat-act').innerText = snap.size;
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const data = d.data();
+        list.innerHTML += `
+          <div class="list-item">
+            <div class="item-info">
+              <img src="${data.imageUrl}">
+              <div><strong>${data.title}</strong><br><small>${data.description.substring(0,50)}...</small></div>
+            </div>
+            <button class="delete-btn" onclick="deleteItem('activities', '${d.id}', '${data.storagePath}')">Delete</button>
+          </div>`;
+      });
+    }
+
+    window.addActivity = async () => {
+      const title = document.getElementById('act-title').value;
+      const desc = document.getElementById('act-desc').value;
+      const file = document.getElementById('act-file').files[0];
+      const status = document.getElementById('act-status');
+      if(!title || !file) return alert("Title and Image required");
+      
+      status.innerText = "Uploading...";
+      const path = `activities/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      await addDoc(collection(db, "activities"), { title, description: desc, imageUrl: url, storagePath: path, date: new Date().toISOString() });
+      status.innerText = "✅ Uploaded!";
+      document.getElementById('act-title').value = ''; document.getElementById('act-desc').value = ''; document.getElementById('act-file').value = '';
+      loadActivities();
+    };
+
+    // 2. PROGRAMS
+    async function loadPrograms() {
+      const list = document.getElementById('prog-list');
+      const snap = await getDocs(collection(db, "programs"));
+      document.getElementById('stat-prog').innerText = snap.size;
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const data = d.data();
+        list.innerHTML += `
+          <div class="list-item">
+            <div class="item-info"><div><strong>${data.title}</strong><br><small>${data.description.substring(0,50)}...</small></div></div>
+            <button class="delete-btn" onclick="deleteItem('programs', '${d.id}')">Delete</button>
+          </div>`;
+      });
+    }
+
+    window.addProgram = async () => {
+      const title = document.getElementById('prog-title').value;
+      const desc = document.getElementById('prog-desc').value;
+      if(!title) return alert("Title required");
+      await addDoc(collection(db, "programs"), { title, description: desc });
+      document.getElementById('prog-status').innerText = "✅ Added!";
+      document.getElementById('prog-title').value = ''; document.getElementById('prog-desc').value = '';
+      loadPrograms();
+    };
+
+    // 3. TEAM
+    async function loadTeam() {
+      const list = document.getElementById('team-list');
+      const snap = await getDocs(collection(db, "team"));
+      document.getElementById('stat-team').innerText = snap.size;
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const data = d.data();
+        list.innerHTML += `
+          <div class="list-item">
+            <div class="item-info">
+              <img src="${data.imageUrl}">
+              <div><strong>${data.name}</strong><br><small>${data.role}</small></div>
+            </div>
+            <button class="delete-btn" onclick="deleteItem('team', '${d.id}', '${data.storagePath}')">Delete</button>
+          </div>`;
+      });
+    }
+
+    window.addTeam = async () => {
+      const name = document.getElementById('team-name').value;
+      const role = document.getElementById('team-role').value;
+      const file = document.getElementById('team-file').files[0];
+      const status = document.getElementById('team-status');
+      if(!name || !file) return alert("Name and Image required");
+      
+      status.innerText = "Uploading...";
+      const path = `team/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      await addDoc(collection(db, "team"), { name, role, imageUrl: url, storagePath: path });
+      status.innerText = "✅ Added!";
+      document.getElementById('team-name').value = ''; document.getElementById('team-role').value = ''; document.getElementById('team-file').value = '';
+      loadTeam();
+    };
+
+    // 4. SETTINGS
+    async function loadSettings() {
+      const docRef = doc(db, "settings", "general");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('set-email').value = data.email || '';
+        document.getElementById('set-phone').value = data.phone || '';
+        document.getElementById('set-address').value = data.address || '';
+        document.getElementById('set-wa').value = data.whatsapp || '';
       }
+    }
 
-      status.innerText = "Uploading image... Please wait.";
-      status.style.color = "blue";
+    window.saveSettings = async () => {
+      await setDoc(doc(db, "settings", "general"), {
+        email: document.getElementById('set-email').value,
+        phone: document.getElementById('set-phone').value,
+        address: document.getElementById('set-address').value,
+        whatsapp: document.getElementById('set-wa').value
+      });
+      document.getElementById('set-status').innerText = "✅ Settings Saved!";
+    };
 
-      try {
-        // 1. Upload image to Firebase Storage
-        const storageRef = ref(storage, 'activities/' + Date.now() + '_' + file.name);
-        await uploadBytes(storageRef, file);
-        const imageUrl = await getDownloadURL(storageRef);
-
-        // 2. Save text and image link to Database
-        await addDoc(collection(db, "activities"), {
-          title: title,
-          description: desc,
-          imageUrl: imageUrl,
-          date: new Date().toISOString()
-        });
-
-        status.innerText = "✅ Success! Activity added to website.";
-        status.style.color = "green";
-        
-        // Clear form
-        document.getElementById('actTitle').value = "";
-        document.getElementById('actDesc').value = "";
-        document.getElementById('actImage').value = "";
-      } catch (error) {
-        status.innerText = "❌ Error: " + error.message;
-        status.style.color = "red";
+    // --- DELETE FUNCTION ---
+    window.deleteItem = async (col, id, path) => {
+      if(!confirm("Are you sure?")) return;
+      if(path) {
+        try { await deleteObject(ref(storage, path)); } catch(e){}
       }
+      await deleteDoc(doc(db, col, id));
+      loadAllData();
     };
   </script>
 </body>
-  </html>
+            </html>
