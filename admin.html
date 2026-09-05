@@ -3,218 +3,687 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="DANDI CCI Admin Dashboard">
+  <meta name="theme-color" content="#0b5d3b">
   <title>DANDI CCI Admin Dashboard</title>
   <style>
     :root {
       --primary: #0b5d3b;
       --primary-dark: #08422a;
+      --primary-light: #e8f5e9;
       --secondary: #f4a261;
       --bg: #f4f6f9;
       --card-bg: #ffffff;
       --text: #2c3e50;
       --text-light: #7f8c8d;
       --danger: #e74c3c;
+      --danger-dark: #c0392b;
       --success: #2ecc71;
+      --success-dark: #27ae60;
+      --warning: #f39c12;
       --border: #e1e4e8;
+      --shadow: 0 2px 8px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
     
-    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- TOAST NOTIFICATIONS --- */
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 350px;
+    }
+    .toast {
+      padding: 16px 20px;
+      border-radius: 12px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast-success { background: var(--success); }
+    .toast-error { background: var(--danger); }
+    .toast-info { background: var(--primary); }
+    .toast-warning { background: var(--warning); }
+    .toast-icon { font-size: 18px; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
 
     /* --- LOGIN SCREEN --- */
     #login-screen {
-      position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+      position: fixed; 
+      inset: 0; 
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 1000; 
+      padding: 20px;
     }
     .login-box {
-      background: white; padding: 40px 30px; border-radius: 16px; width: 100%; max-width: 400px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center;
+      background: white; 
+      padding: 40px 30px; 
+      border-radius: 16px; 
+      width: 100%; 
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+      text-align: center;
     }
-    .login-box h2 { color: var(--primary); margin-bottom: 10px; font-size: 24px; }
-    .login-box p { color: var(--text-light); margin-bottom: 30px; font-size: 14px; }
+    .login-box .logo-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 28px;
+    }
+    .login-box h2 { 
+      color: var(--primary); 
+      margin-bottom: 8px; 
+      font-size: 24px; 
+    }
+    .login-box p { 
+      color: var(--text-light); 
+      margin-bottom: 30px; 
+      font-size: 14px; 
+    }
+    .login-box .input-wrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
     .login-box input {
-      width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid var(--border);
-      border-radius: 8px; font-size: 16px; background: #f8f9fa; transition: 0.3s;
+      width: 100%; 
+      padding: 14px 16px; 
+      border: 1px solid var(--border);
+      border-radius: 8px; 
+      font-size: 16px; 
+      background: #f8f9fa; 
+      transition: 0.3s;
     }
-    .login-box input:focus { outline: none; border-color: var(--primary); background: white; }
+    .login-box input:focus { 
+      outline: none; 
+      border-color: var(--primary); 
+      background: white; 
+      box-shadow: 0 0 0 3px rgba(11, 93, 59, 0.1);
+    }
+    .login-box .pass-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--text-light);
+    }
     .login-box button {
-      width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
-      border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s;
+      width: 100%; 
+      padding: 14px; 
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 16px; 
+      font-weight: 600; 
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .login-box button:hover:not(:disabled) { background: var(--primary-dark); }
-    #login-error { color: var(--danger); margin-top: 15px; font-size: 14px; min-height: 20px; }
+    .login-box button:hover:not(:disabled) { 
+      background: var(--primary-dark); 
+      transform: translateY(-1px);
+    }
+    .login-box button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    #login-error { 
+      color: var(--danger); 
+      margin-top: 15px; 
+      font-size: 14px; 
+      min-height: 20px; 
+    }
 
     /* --- MAIN APP LAYOUT --- */
-    #app-container { display: none; flex-direction: column; min-height: 100vh; }
+    #app-container { 
+      display: none; 
+      flex-direction: column; 
+      min-height: 100vh; 
+    }
 
     /* Top Header */
     .top-header {
-      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-      color: white; padding: 15px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+      background: var(--primary); 
+      color: white; 
+      padding: 15px 20px;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+      position: sticky; 
+      top: 0; 
+      z-index: 100;
     }
-    .top-header h1 { font-size: 18px; font-weight: 600; }
+    .top-header h1 { 
+      font-size: 18px; 
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .logout-btn {
-      background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px;
-      border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.3s;
+      background: rgba(255,255,255,0.2); 
+      color: white; 
+      border: none; 
+      padding: 8px 16px;
+      border-radius: 20px; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: 500;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .logout-btn:hover { background: rgba(255,255,255,0.3); }
+    .logout-btn:hover { 
+      background: rgba(255,255,255,0.3); 
+    }
 
     /* Navigation Tabs */
     .nav-tabs {
-      background: white; display: flex; overflow-x: auto; padding: 0 10px;
-      border-bottom: 1px solid var(--border); position: sticky; top: 56px; z-index: 99;
-      scrollbar-width: none; /* Firefox */
+      background: white; 
+      display: flex; 
+      overflow-x: auto; 
+      padding: 0 10px;
+      border-bottom: 1px solid var(--border); 
+      position: sticky; 
+      top: 56px; 
+      z-index: 99;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
-    .nav-tabs::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+    .nav-tabs::-webkit-scrollbar { display: none; }
     .nav-tab {
-      padding: 15px 20px; white-space: nowrap; cursor: pointer; font-size: 14px;
-      font-weight: 500; color: var(--text-light); border-bottom: 3px solid transparent;
+      padding: 15px 20px; 
+      white-space: nowrap; 
+      cursor: pointer; 
+      font-size: 14px;
+      font-weight: 500; 
+      color: var(--text-light); 
+      border-bottom: 3px solid transparent;
       transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .nav-tab:hover { color: var(--primary); }
+    .nav-tab.active { 
+      color: var(--primary); 
+      border-bottom-color: var(--primary); 
+      font-weight: 600; 
+    }
 
     /* Main Content */
-    .main-content { padding: 20px; max-width: 1000px; margin: 0 auto; width: 100%; }
+    .main-content { 
+      padding: 20px; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      width: 100%; 
+    }
     .view { display: none; animation: fadeIn 0.3s ease; }
     .view.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(10px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
 
-    h2.page-title { color: var(--primary); margin-bottom: 20px; font-size: 22px; }
+    h2.page-title { 
+      color: var(--primary); 
+      margin-bottom: 20px; 
+      font-size: 22px; 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
     /* Cards */
     .card {
-      background: var(--card-bg); padding: 20px; border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+      background: var(--card-bg); 
+      padding: 20px; 
+      border-radius: 12px;
+      box-shadow: var(--shadow); 
+      margin-bottom: 20px;
     }
-    .card h3 { color: var(--text); margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .card h3 { 
+      color: var(--text); 
+      margin-bottom: 15px; 
+      font-size: 18px; 
+      border-bottom: 1px solid var(--border); 
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .stat-card {
-      background: white; padding: 20px; border-radius: 12px; text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary);
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+      gap: 15px; 
+      margin-bottom: 20px; 
     }
-    .stat-card h3 { font-size: 28px; color: var(--primary); margin-bottom: 5px; border: none; padding: 0; }
-    .stat-card p { color: var(--text-light); font-size: 13px; font-weight: 500; }
+    .stat-card {
+      background: white; 
+      padding: 20px; 
+      border-radius: 12px; 
+      text-align: center;
+      box-shadow: var(--shadow); 
+      border-left: 4px solid var(--primary);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-card h3 { 
+      font-size: 28px; 
+      color: var(--primary); 
+      margin-bottom: 5px; 
+      border: none; 
+      padding: 0;
+      display: block;
+    }
+    .stat-card p { 
+      color: var(--text-light); 
+      font-size: 13px; 
+      font-weight: 500; 
+    }
 
     /* Forms */
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--text); }
-    input[type="text"], input[type="email"], input[type="password"], textarea, select {
-      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 15px; background: #f8f9fa; transition: 0.3s;
+    .form-group { 
+      margin-bottom: 15px; 
     }
-    input:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
-    textarea { resize: vertical; min-height: 80px; }
+    .form-group label { 
+      display: block; 
+      margin-bottom: 8px; 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: var(--text);
+    }
+    .form-group .char-count {
+      float: right;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"], 
+    textarea, 
+    select {
+      width: 100%; 
+      padding: 12px 14px; 
+      border: 1px solid var(--border); 
+      border-radius: 8px;
+      font-size: 15px; 
+      background: #f8f9fa; 
+      transition: 0.3s;
+      color: var(--text);
+    }
+    input:focus, textarea:focus, select:focus { 
+      outline: none; 
+      border-color: var(--primary); 
+      background: white;
+      box-shadow: 0 0 0 3px rgba(11, 93, 59, 0.1);
+    }
+    textarea { 
+      resize: vertical; 
+      min-height: 100px;
+      line-height: 1.5;
+    }
+    input:disabled, textarea:disabled, select:disabled {
+      background: #eee;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
 
     /* Custom File Upload */
-    .file-upload-wrapper { position: relative; margin-bottom: 15px; }
+    .file-upload-wrapper { 
+      position: relative; 
+      margin-bottom: 15px; 
+    }
     .file-upload-btn {
-      display: block; width: 100%; padding: 12px; background: #f8f9fa; border: 2px dashed var(--border);
-      border-radius: 8px; text-align: center; cursor: pointer; color: var(--text-light); font-size: 14px;
+      display: block; 
+      width: 100%; 
+      padding: 20px; 
+      background: #f8f9fa; 
+      border: 2px dashed var(--border);
+      border-radius: 8px; 
+      text-align: center; 
+      cursor: pointer; 
+      color: var(--text-light); 
+      font-size: 14px;
       transition: 0.3s;
     }
-    .file-upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .file-upload-btn:hover { 
+      border-color: var(--primary); 
+      color: var(--primary); 
+      background: var(--primary-light);
+    }
+    .file-upload-btn.dragover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .file-upload-btn .upload-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      display: block;
+    }
     .file-upload-wrapper input[type="file"] {
-      position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+      position: absolute; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      opacity: 0; 
+      cursor: pointer;
+    }
+    .image-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+    .image-preview img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .image-preview .remove-preview {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 13px;
     }
 
     /* Buttons */
     .btn-primary {
-      width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
-      border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s;
+      width: 100%; 
+      padding: 14px; 
+      background: var(--primary); 
+      color: white; 
+      border: none;
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 16px; 
+      font-weight: 600; 
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
-    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
-    
+    .btn-primary:hover:not(:disabled) { 
+      background: var(--primary-dark); 
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
     .btn-danger {
-      background: var(--danger); color: white; border: none; padding: 8px 16px;
-      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+      background: var(--danger); 
+      color: white; 
+      border: none; 
+      padding: 8px 16px;
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 13px; 
+      font-weight: 500;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
     }
-    .btn-danger:hover { background: #c0392b; }
+    .btn-danger:hover:not(:disabled) { 
+      background: var(--danger-dark); 
+    }
+    .btn-danger:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     /* Lists */
     .list-item {
-      display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border);
+      display: flex; 
+      align-items: center; 
+      padding: 15px 0; 
+      border-bottom: 1px solid var(--border);
+      gap: 15px;
     }
     .list-item:last-child { border-bottom: none; }
-    .list-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px; background: #eee; flex-shrink: 0; }
-    .item-info { flex: 1; overflow: hidden; }
-    .item-info strong { display: block; font-size: 15px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .item-info small { color: var(--text-light); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    
-    .empty-state, .loading-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
-    .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
-
-    /* Spinner */
-    .spinner {
+    .list-item img { 
+      width: 60px; 
+      height: 60px; 
+      object-fit: cover; 
+      border-radius: 8px; 
+      background: #eee; 
+      flex-shrink: 0;
+    }
+    .item-info { 
+      flex: 1; 
+      min-width: 0;
+    }
+    .item-info strong { 
+      display: block; 
+      font-size: 15px; 
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-info small { 
+      color: var(--text-light); 
+      font-size: 13px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .item-info .date-badge {
       display: inline-block;
+      font-size: 11px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+    .empty-state { 
+      text-align: center; 
+      padding: 40px 20px; 
+      color: var(--text-light);
+    }
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    .empty-state p {
+      font-size: 15px;
+    }
+
+    /* Loading Spinner */
+    .spinner {
       width: 16px;
       height: 16px;
       border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
       border-top-color: white;
+      border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
+      display: inline-block;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-dark {
+      border: 2px solid rgba(11, 93, 59, 0.2);
+      border-top-color: var(--primary);
+    }
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
 
-    /* Toast Notifications */
-    #toast {
-      visibility: hidden;
-      min-width: 280px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 8px;
-      padding: 16px;
+    /* Confirm Modal */
+    .modal-overlay {
       position: fixed;
-      z-index: 9999;
-      right: 20px;
-      bottom: 30px;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-box .modal-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .modal-box h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      border: none;
+      padding: 0;
+      justify-content: center;
+    }
+    .modal-box p {
+      color: var(--text-light);
+      margin-bottom: 25px;
       font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: visibility 0s, opacity 0.4s ease, transform 0.4s ease;
-      opacity: 0;
-      transform: translateY(20px);
+      line-height: 1.5;
     }
-    #toast.show {
-      visibility: visible;
-      opacity: 1;
-      transform: translateY(0);
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
     }
-    #toast.success { background-color: var(--success); }
-    #toast.error { background-color: var(--danger); }
-    #toast.info { background-color: var(--primary); }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .modal-cancel {
+      background: #eee;
+      color: var(--text);
+    }
+    .modal-cancel:hover { background: #ddd; }
+    .modal-confirm {
+      background: var(--danger);
+      color: white;
+    }
+    .modal-confirm:hover { background: var(--danger-dark); }
 
     /* Desktop adjustments */
     @media (min-width: 768px) {
       .top-header { padding: 20px 40px; }
+      .top-header h1 { font-size: 20px; }
       .main-content { padding: 40px; }
       .nav-tabs { justify-content: center; }
       .nav-tab { padding: 20px 30px; font-size: 16px; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
       .list-item img { width: 80px; height: 80px; }
+    }
+
+    /* Small mobile adjustments */
+    @media (max-width: 380px) {
+      .list-item { flex-wrap: wrap; }
+      .list-item img { width: 50px; height: 50px; }
+      .btn-danger { padding: 6px 12px; font-size: 12px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast"></div>
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <h3 id="modal-title">Confirm Delete</h3>
+      <p id="modal-message">Are you sure you want to delete this? This action cannot be undone.</p>
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-confirm" id="modal-confirm-btn">Delete</button>
+      </div>
+    </div>
+  </div>
 
   <!-- LOGIN SCREEN -->
   <div id="login-screen">
     <div class="login-box">
+      <div class="logo-icon">🏛️</div>
       <h2>DANDI CCI Admin</h2>
       <p>Sign in to manage your website</p>
-      <input type="email" id="login-email" placeholder="Email Address">
-      <input type="password" id="login-pass" placeholder="Password">
-      <button onclick="handleLogin()">Sign In</button>
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="input-wrapper">
+          <input type="email" id="login-email" placeholder="Email Address" required autocomplete="email">
+        </div>
+        <div class="input-wrapper">
+          <input type="password" id="login-pass" placeholder="Password" required autocomplete="current-password">
+          <button type="button" class="pass-toggle" onclick="togglePassword()">👁️</button>
+        </div>
+        <button type="submit" id="login-btn">
+          <span id="login-btn-text">Sign In</span>
+        </button>
+      </form>
       <p id="login-error"></p>
     </div>
   </div>
@@ -222,133 +691,188 @@
   <!-- MAIN APP -->
   <div id="app-container">
     <header class="top-header">
-      <h1>DANDI CCI Dashboard</h1>
-      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      <h1>🏛️ DANDI CCI Dashboard</h1>
+      <button class="logout-btn" onclick="handleLogout()">
+        <span>🚪</span> Logout
+      </button>
     </header>
 
-    <nav class="nav-tabs">
-      <div class="nav-tab active" onclick="showView('dashboard', this)">Dashboard</div>
-      <div class="nav-tab" onclick="showView('activities', this)">Activities</div>
-      <div class="nav-tab" onclick="showView('programs', this)">Programs</div>
-      <div class="nav-tab" onclick="showView('team', this)">Team</div>
-      <div class="nav-tab" onclick="showView('settings', this)">Settings</div>
+    <nav class="nav-tabs" id="nav-tabs">
+      <div class="nav-tab active" data-view="dashboard" onclick="showView('dashboard', this)">📊 Dashboard</div>
+      <div class="nav-tab" data-view="activities" onclick="showView('activities', this)">📸 Activities</div>
+      <div class="nav-tab" data-view="programs" onclick="showView('programs', this)">📋 Programs</div>
+      <div class="nav-tab" data-view="team" onclick="showView('team', this)">👥 Team</div>
+      <div class="nav-tab" data-view="settings" onclick="showView('settings', this)">⚙️ Settings</div>
     </nav>
 
     <main class="main-content">
       
       <!-- DASHBOARD VIEW -->
       <div id="view-dashboard" class="view active">
-        <h2 class="page-title">Overview</h2>
+        <h2 class="page-title">📊 Overview</h2>
         <div class="stats-grid">
-          <div class="stat-card"><h3 id="stat-act">0</h3><p>Activities</p></div>
-          <div class="stat-card"><h3 id="stat-prog">0</h3><p>Programs</p></div>
-          <div class="stat-card"><h3 id="stat-team">0</h3><p>Team Members</p></div>
+          <div class="stat-card">
+            <h3 id="stat-act">0</h3>
+            <p>Activities</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="stat-prog">0</h3>
+            <p>Programs</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="stat-team">0</h3>
+            <p>Team Members</p>
+          </div>
         </div>
         <div class="card">
-          <h3>Welcome, Admin!</h3>
-          <p style="color: var(--text-light); line-height: 1.6;">Use the tabs above to manage your website content. Any changes you make here will appear on the live website immediately.</p>
+          <h3>👋 Welcome, Admin!</h3>
+          <p style="color: var(--text-light); line-height: 1.6;">
+            Use the tabs above to manage your website content. Any changes you make here will appear on the live website immediately. 
+            You can add, edit, and delete activities, programs, and team members with image uploads.
+          </p>
+        </div>
+        <div class="card">
+          <h3>📈 Quick Actions</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button class="btn-primary" onclick="showView('activities', document.querySelector('[data-view=activities]'))">
+              📸 Add Activity
+            </button>
+            <button class="btn-primary" onclick="showView('programs', document.querySelector('[data-view=programs]'))" style="background: var(--secondary);">
+              📋 Add Program
+            </button>
+            <button class="btn-primary" onclick="showView('team', document.querySelector('[data-view=team]'))" style="background: #3498db;">
+              👥 Add Team Member
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- ACTIVITIES VIEW -->
       <div id="view-activities" class="view">
-        <h2 class="page-title">Manage Activities</h2>
+        <h2 class="page-title">📸 Manage Activities</h2>
         <div class="card">
-          <h3>Add New Activity</h3>
-          <div class="form-group">
-            <label for="act-title">Activity Title</label>
-            <input type="text" id="act-title" placeholder="e.g., Sallah Outreach 2024">
-          </div>
-          <div class="form-group">
-            <label for="act-desc">Description</label>
-            <textarea id="act-desc" placeholder="Brief description of the activity..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Upload Image</label>
-            <div class="file-upload-wrapper">
-              <div class="file-upload-btn" id="act-file-label">📁 Tap to choose an image</div>
-              <input type="file" id="act-file" accept="image/*" onchange="updateFileLabel('act-file', 'act-file-label')">
+          <h3>➕ Add New Activity</h3>
+          <form id="act-form" onsubmit="addActivity(event)">
+            <div class="form-group">
+              <label>Activity Title <span class="char-count"><span id="act-title-count">0</span>/100</span></label>
+              <input type="text" id="act-title" placeholder="e.g., Sallah Outreach 2024" maxlength="100" oninput="updateCharCount('act-title', 'act-title-count')">
             </div>
-          </div>
-          <button class="btn-primary" onclick="addActivity()">Upload Activity</button>
+            <div class="form-group">
+              <label>Description <span class="char-count"><span id="act-desc-count">0</span>/500</span></label>
+              <textarea id="act-desc" placeholder="Brief description of the activity..." maxlength="500" oninput="updateCharCount('act-desc', 'act-desc-count')"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Upload Image</label>
+              <div class="file-upload-wrapper">
+                <div class="file-upload-btn" id="act-file-btn">
+                  <span class="upload-icon">📁</span>
+                  <span id="act-file-label">Click or drag an image here</span>
+                </div>
+                <input type="file" id="act-file" accept="image/*" onchange="handleFileSelect('act-file', 'act-file-btn', 'act-preview')">
+              </div>
+              <div class="image-preview" id="act-preview"></div>
+            </div>
+            <button type="submit" class="btn-primary" id="act-submit-btn">
+              <span id="act-btn-text">📤 Upload Activity</span>
+            </button>
+          </form>
         </div>
         <div class="card">
-          <h3>Existing Activities</h3>
+          <h3>📋 Existing Activities</h3>
           <div id="act-list"></div>
         </div>
       </div>
 
       <!-- PROGRAMS VIEW -->
       <div id="view-programs" class="view">
-        <h2 class="page-title">Manage Programs</h2>
+        <h2 class="page-title">📋 Manage Programs</h2>
         <div class="card">
-          <h3>Add New Program</h3>
-          <div class="form-group">
-            <label for="prog-title">Program Title</label>
-            <input type="text" id="prog-title" placeholder="e.g., Education Support">
-          </div>
-          <div class="form-group">
-            <label for="prog-desc">Description</label>
-            <textarea id="prog-desc" placeholder="Describe the program..."></textarea>
-          </div>
-          <button class="btn-primary" onclick="addProgram()">Add Program</button>
+          <h3>➕ Add New Program</h3>
+          <form id="prog-form" onsubmit="addProgram(event)">
+            <div class="form-group">
+              <label>Program Title <span class="char-count"><span id="prog-title-count">0</span>/100</span></label>
+              <input type="text" id="prog-title" placeholder="e.g., Education Support" maxlength="100" oninput="updateCharCount('prog-title', 'prog-title-count')">
+            </div>
+            <div class="form-group">
+              <label>Description <span class="char-count"><span id="prog-desc-count">0</span>/500</span></label>
+              <textarea id="prog-desc" placeholder="Describe the program..." maxlength="500" oninput="updateCharCount('prog-desc', 'prog-desc-count')"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="prog-submit-btn">
+              <span id="prog-btn-text">✅ Add Program</span>
+            </button>
+          </form>
         </div>
         <div class="card">
-          <h3>Existing Programs</h3>
+          <h3>📋 Existing Programs</h3>
           <div id="prog-list"></div>
         </div>
       </div>
 
       <!-- TEAM VIEW -->
       <div id="view-team" class="view">
-        <h2 class="page-title">Manage Leadership Team</h2>
+        <h2 class="page-title">👥 Manage Leadership Team</h2>
         <div class="card">
-          <h3>Add Team Member</h3>
-          <div class="form-group">
-            <label for="team-name">Full Name</label>
-            <input type="text" id="team-name" placeholder="e.g., Amb. Abbas Ibn Saad">
-          </div>
-          <div class="form-group">
-            <label for="team-role">Role / Position</label>
-            <input type="text" id="team-role" placeholder="e.g., Founder">
-          </div>
-          <div class="form-group">
-            <label>Profile Picture</label>
-            <div class="file-upload-wrapper">
-              <div class="file-upload-btn" id="team-file-label">📁 Tap to choose an image</div>
-              <input type="file" id="team-file" accept="image/*" onchange="updateFileLabel('team-file', 'team-file-label')">
+          <h3>➕ Add Team Member</h3>
+          <form id="team-form" onsubmit="addTeam(event)">
+            <div class="form-group">
+              <label>Full Name <span class="char-count"><span id="team-name-count">0</span>/80</span></label>
+              <input type="text" id="team-name" placeholder="e.g., Amb. Abbas Ibn Saad" maxlength="80" oninput="updateCharCount('team-name', 'team-name-count')">
             </div>
-          </div>
-          <button class="btn-primary" onclick="addTeam()">Add Member</button>
+            <div class="form-group">
+              <label>Role / Position <span class="char-count"><span id="team-role-count">0</span>/80</span></label>
+              <input type="text" id="team-role" placeholder="e.g., Founder" maxlength="80" oninput="updateCharCount('team-role', 'team-role-count')">
+            </div>
+            <div class="form-group">
+              <label>Profile Picture</label>
+              <div class="file-upload-wrapper">
+                <div class="file-upload-btn" id="team-file-btn">
+                  <span class="upload-icon">📁</span>
+                  <span id="team-file-label">Click or drag an image here</span>
+                </div>
+                <input type="file" id="team-file" accept="image/*" onchange="handleFileSelect('team-file', 'team-file-btn', 'team-preview')">
+              </div>
+              <div class="image-preview" id="team-preview"></div>
+            </div>
+            <button type="submit" class="btn-primary" id="team-submit-btn">
+              <span id="team-btn-text">👤 Add Member</span>
+            </button>
+          </form>
         </div>
         <div class="card">
-          <h3>Current Team</h3>
+          <h3>👥 Current Team</h3>
           <div id="team-list"></div>
         </div>
       </div>
 
       <!-- SETTINGS VIEW -->
       <div id="view-settings" class="view">
-        <h2 class="page-title">Global Site Settings</h2>
+        <h2 class="page-title">⚙️ Global Site Settings</h2>
         <div class="card">
-          <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">Update these details to change the contact information across your entire website.</p>
-          <div class="form-group">
-            <label for="set-email">Email Address</label>
-            <input type="email" id="set-email">
-          </div>
-          <div class="form-group">
-            <label for="set-phone">Phone Number</label>
-            <input type="text" id="set-phone">
-          </div>
-          <div class="form-group">
-            <label for="set-address">Office Address</label>
-            <textarea id="set-address" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="set-wa">WhatsApp Number (Country code + number, no + sign)</label>
-            <input type="text" id="set-wa" placeholder="e.g., 2348063182224">
-          </div>
-          <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+          <h3>📞 Contact Information</h3>
+          <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">
+            Update these details to change the contact information across your entire website.
+          </p>
+          <form id="settings-form" onsubmit="saveSettings(event)">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="set-email" placeholder="info@dandicci.org">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="set-phone" placeholder="+234 800 000 0000">
+            </div>
+            <div class="form-group">
+              <label>Office Address</label>
+              <textarea id="set-address" rows="3" placeholder="Full office address..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>WhatsApp Number</label>
+              <input type="text" id="set-wa" placeholder="2348063182224 (country code + number, no + sign)">
+            </div>
+            <button type="submit" class="btn-primary" id="settings-submit-btn">
+              <span id="settings-btn-text">💾 Save Settings</span>
+            </button>
+          </form>
         </div>
       </div>
 
@@ -357,8 +881,6 @@
 
   <!-- FIREBASE LOGIC -->
   <script type="module">
-    // 📌 NOTE: Ensure your Firestore and Storage Rules are set to allow read/write ONLY for authenticated users!
-    
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -378,231 +900,534 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // --- GLOBAL UI HELPERS ---
-    window.showToast = (msg, type = 'success') => {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.className = `toast show ${type}`;
-      clearTimeout(toast.timer);
-      toast.timer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    // ============ UTILITY FUNCTIONS ============
+    
+    // Toast notification system
+    window.showToast = (message, type = 'info', duration = 3000) => {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+      toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
     };
 
-    window.setBtnLoading = (btn, isLoading, loadingText = "Processing...") => {
-      if (!btn) return;
-      if (isLoading) {
-        btn.dataset.originalText = btn.innerHTML; 
-        btn.innerHTML = `<span class="spinner"></span> ${loadingText}`;
-        btn.disabled = true;
+    // Confirm modal
+    let modalCallback = null;
+    window.showConfirm = (title, message, onConfirm) => {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      document.getElementById('confirm-modal').classList.add('active');
+      modalCallback = onConfirm;
+    };
+    
+    window.closeModal = () => {
+      document.getElementById('confirm-modal').classList.remove('active');
+      modalCallback = null;
+    };
+    
+    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+      if (modalCallback) modalCallback();
+      closeModal();
+    });
+
+    // Character count updater
+    window.updateCharCount = (inputId, countId) => {
+      const input = document.getElementById(inputId);
+      const count = document.getElementById(countId);
+      count.textContent = input.value.length;
+    };
+
+    // Password toggle
+    window.togglePassword = () => {
+      const passInput = document.getElementById('login-pass');
+      const btn = document.querySelector('.pass-toggle');
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        btn.textContent = '🙈';
       } else {
-        btn.innerHTML = btn.dataset.originalText || "Submit";
-        btn.disabled = false;
+        passInput.type = 'password';
+        btn.textContent = '👁️';
       }
     };
 
-    window.sanitizeFilename = (name) => name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    // Sanitize file names
+    const sanitizeFileName = (name) => {
+      return name.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 50);
+    };
 
-    // --- AUTHENTICATION ---
-    window.handleLogin = () => {
+    // Format date
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+    // Escape HTML to prevent XSS
+    const escapeHtml = (str) => {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+
+    // Set button loading state
+    const setButtonLoading = (btnId, isLoading, originalText) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      
+      if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> <span>Please wait...</span>`;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = `<span>${originalText}</span>`;
+      }
+    };
+
+    // Disable form inputs
+    const setFormDisabled = (formId, isDisabled) => {
+      const form = document.getElementById(formId);
+      if (!form) return;
+      const inputs = form.querySelectorAll('input, textarea, select');
+      inputs.forEach(input => input.disabled = isDisabled);
+    };
+
+    // ============ FILE HANDLING ============
+    
+    window.handleFileSelect = (inputId, btnId, previewId) => {
+      const fileInput = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      const preview = document.getElementById(previewId);
+      const label = btn.querySelector('span:last-child');
+      
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('File size must be less than 5MB', 'error');
+          fileInput.value = '';
+          return;
+        }
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          showToast('Please select an image file', 'error');
+          fileInput.value = '';
+          return;
+        }
+        
+        label.textContent = `✅ ${file.name}`;
+        btn.style.borderColor = 'var(--success)';
+        btn.style.color = 'var(--success)';
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.innerHTML = `
+            <img src="${e.target.result}" alt="Preview">
+            <span class="remove-preview" onclick="removePreview('${inputId}', '${btnId}', '${previewId}')">🗑️ Remove image</span>
+          `;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.removePreview = (inputId, btnId, previewId) => {
+      const fileInput = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      const preview = document.getElementById(previewId);
+      const label = btn.querySelector('span:last-child');
+      
+      fileInput.value = '';
+      label.textContent = 'Click or drag an image here';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      preview.innerHTML = '';
+    };
+
+    // Drag and drop for file uploads
+    document.querySelectorAll('.file-upload-btn').forEach(btn => {
+      btn.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        btn.classList.add('dragover');
+      });
+      btn.addEventListener('dragleave', () => {
+        btn.classList.remove('dragover');
+      });
+      btn.addEventListener('drop', (e) => {
+        e.preventDefault();
+        btn.classList.remove('dragover');
+        const input = btn.parentElement.querySelector('input[type="file"]');
+        if (e.dataTransfer.files.length > 0) {
+          input.files = e.dataTransfer.files;
+          input.dispatchEvent(new Event('change'));
+        }
+      });
+    });
+
+    // ============ AUTHENTICATION ============
+    
+    window.handleLogin = async (e) => {
+      e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
       const pass = document.getElementById('login-pass').value;
-      const btn = document.querySelector('#login-screen button');
+      const errorEl = document.getElementById('login-error');
       
-      if (!email || !pass) return showToast("Please enter your email and password.", "error");
+      if (!email || !pass) {
+        errorEl.innerText = "Please enter email and password.";
+        errorEl.style.color = "var(--danger)";
+        return;
+      }
       
-      setBtnLoading(btn, true, "Signing in...");
+      setButtonLoading('login-btn', true, 'Sign In');
+      errorEl.innerText = "";
       
-      signInWithEmailAndPassword(auth, email, pass).catch(e => {
-        showToast("Invalid email or password.", "error");
-        setBtnLoading(btn, false);
-      });
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (error) {
+        let message = "Invalid email or password.";
+        if (error.code === 'auth/user-not-found') message = "No account found with this email.";
+        else if (error.code === 'auth/wrong-password') message = "Incorrect password.";
+        else if (error.code === 'auth/invalid-email') message = "Invalid email format.";
+        else if (error.code === 'auth/too-many-requests') message = "Too many attempts. Try again later.";
+        
+        errorEl.innerText = message;
+        errorEl.style.color = "var(--danger)";
+        setButtonLoading('login-btn', false, 'Sign In');
+      }
     };
 
     window.handleLogout = async () => {
-      if (!confirm("Are you sure you want to logout?")) return;
       try {
         await signOut(auth);
-      } catch (e) {
-        showToast("Logout failed.", "error");
+        showToast('Logged out successfully', 'success');
+      } catch (error) {
+        showToast('Error logging out', 'error');
       }
     };
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-container').style.display = 'flex';
-        loadAllData();
+        showToast(`Welcome back!`, 'success');
+        await loadAllData();
       } else {
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('app-container').style.display = 'none';
-        // Reset login button state
-        const loginBtn = document.querySelector('#login-screen button');
-        if (loginBtn) setBtnLoading(loginBtn, false);
+        // Reset login form
+        document.getElementById('login-form').reset();
+        setButtonLoading('login-btn', false, 'Sign In');
       }
     });
 
-    // --- NAVIGATION ---
+    // ============ NAVIGATION ============
+    
     window.showView = (viewName, tabElement) => {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
       document.getElementById(`view-${viewName}`).classList.add('active');
       if (tabElement) tabElement.classList.add('active');
-    };
-
-    window.updateFileLabel = (inputId, labelId) => {
-      const fileInput = document.getElementById(inputId);
-      const label = document.getElementById(labelId);
-      if (fileInput && fileInput.files.length > 0) {
-        label.innerText = "✅ " + fileInput.files[0].name;
-        label.style.borderColor = "var(--success)";
-        label.style.color = "var(--success)";
+      
+      // Scroll to top of content on mobile
+      if (window.innerWidth < 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
 
-    // --- DOM BUILDER HELPER ---
-    function renderListItem({ list, imageUrl, title, subtitle, onDelete, col, id, storagePath }) {
-      const div = document.createElement('div');
-      div.className = 'list-item';
-
-      if (imageUrl) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = title;
-        img.onerror = function() { this.src = 'https://via.placeholder.com/60/e1e4e8/7f8c8d?text=No+Image'; };
-        div.appendChild(img);
-      }
-
-      const info = document.createElement('div');
-      info.className = 'item-info';
-      const strong = document.createElement('strong');
-      strong.textContent = title;
-      const small = document.createElement('small');
-      small.textContent = subtitle || 'No description';
-      info.appendChild(strong);
-      info.appendChild(small);
-      div.appendChild(info);
-
-      const btn = document.createElement('button');
-      btn.className = 'btn-danger';
-      btn.textContent = 'Delete';
-      btn.onclick = () => deleteItem(col, id, storagePath);
-      div.appendChild(btn);
-
-      list.appendChild(div);
-    }
-
-    // --- DATA LOADING ---
+    // ============ DATA LOADING ============
+    
     async function loadAllData() {
-      // Load all concurrently, allowing others to succeed even if one fails
-      await Promise.allSettled([
-        loadActivities(),
-        loadPrograms(),
-        loadTeam(),
-        loadSettings()
-      ]);
+      try {
+        await Promise.all([
+          loadActivities(),
+          loadPrograms(),
+          loadTeam(),
+          loadSettings()
+        ]);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        showToast('Error loading data. Please refresh.', 'error');
+      }
     }
 
+    // 1. ACTIVITIES
     async function loadActivities() {
       const list = document.getElementById('act-list');
-      list.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading activities...</div>';
+      list.innerHTML = '<div class="empty-state"><div class="spinner spinner-dark" style="margin: 20px auto;"></div><p>Loading activities...</p></div>';
+      
       try {
         const snap = await getDocs(collection(db, "activities"));
         document.getElementById('stat-act').innerText = snap.size;
         list.innerHTML = '';
+        
         if (snap.empty) {
-          list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No activities uploaded yet.</p></div>';
+          list.innerHTML = '<div class="empty-state"><div class="empty-icon">📸</div><p>No activities uploaded yet.</p></div>';
           return;
         }
-        const items = [];
-        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
-        // Sort client-side to avoid Firestore index requirements
-        items.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        items.forEach(item => {
-          renderListItem({
-            list,
-            imageUrl: item.imageUrl,
-            title: item.title,
-            subtitle: item.description ? item.description.substring(0, 80) + '...' : 'No description',
-            col: 'activities',
-            id: item.id,
-            storagePath: item.storagePath
+        // Sort client-side to avoid Firestore index requirements
+        const activities = [];
+        snap.forEach(d => activities.push({ id: d.id, ...d.data() }));
+        activities.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+        activities.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2214%22>No Image</text></svg>'">
+            <div class="item-info">
+              <strong>${escapeHtml(item.title)}</strong>
+              <small>${escapeHtml(item.description ? item.description.substring(0, 80) + '...' : 'No description')}</small>
+              ${item.date ? `<span class="date-badge">📅 ${formatDate(item.date)}</span>` : ''}
+            </div>
+            <button class="btn-danger" data-id="${item.id}" data-path="${escapeHtml(item.storagePath)}">🗑️ Delete</button>
+          `;
+          
+          div.querySelector('.btn-danger').addEventListener('click', () => {
+            deleteItem('activities', item.id, item.storagePath);
           });
+          
+          list.appendChild(div);
         });
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to load activities", "error");
-        list.innerHTML = '<div class="empty-state">Error loading activities.</div>';
+      } catch (error) {
+        console.error('Error loading activities:', error);
+        list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Error loading activities.</p></div>';
       }
     }
 
+    window.addActivity = async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('act-title').value.trim();
+      const desc = document.getElementById('act-desc').value.trim();
+      const file = document.getElementById('act-file').files[0];
+      
+      if (!title) {
+        showToast('Please enter an activity title', 'warning');
+        return;
+      }
+      if (!file) {
+        showToast('Please choose an image', 'warning');
+        return;
+      }
+      
+      setButtonLoading('act-submit-btn', true, '📤 Upload Activity');
+      setFormDisabled('act-form', true);
+      
+      try {
+        const safeFileName = sanitizeFileName(file.name);
+        const path = `activities/${Date.now()}_${safeFileName}`;
+        const storageRef = ref(storage, path);
+        
+        showToast('Uploading image...', 'info', 5000);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        
+        await addDoc(collection(db, "activities"), { 
+          title, 
+          description: desc, 
+          imageUrl: url, 
+          storagePath: path, 
+          date: new Date().toISOString() 
+        });
+        
+        showToast('✅ Activity uploaded successfully!', 'success');
+        document.getElementById('act-form').reset();
+        removePreview('act-file', 'act-file-btn', 'act-preview');
+        document.getElementById('act-title-count').textContent = '0';
+        document.getElementById('act-desc-count').textContent = '0';
+        await loadActivities();
+      } catch (error) {
+        console.error('Error uploading activity:', error);
+        showToast('Error uploading activity. Please try again.', 'error');
+      } finally {
+        setButtonLoading('act-submit-btn', false, '📤 Upload Activity');
+        setFormDisabled('act-form', false);
+      }
+    };
+
+    // 2. PROGRAMS
     async function loadPrograms() {
       const list = document.getElementById('prog-list');
-      list.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading programs...</div>';
+      list.innerHTML = '<div class="empty-state"><div class="spinner spinner-dark" style="margin: 20px auto;"></div><p>Loading programs...</p></div>';
+      
       try {
         const snap = await getDocs(collection(db, "programs"));
         document.getElementById('stat-prog').innerText = snap.size;
         list.innerHTML = '';
+        
         if (snap.empty) {
-          list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No programs added yet.</p></div>';
+          list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No programs added yet.</p></div>';
           return;
         }
-        const items = [];
-        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
-        items.sort((a, b) => a.title.localeCompare(b.title));
 
-        items.forEach(item => {
-          renderListItem({
-            list,
-            title: item.title,
-            subtitle: item.description ? item.description.substring(0, 80) + '...' : 'No description',
-            col: 'programs',
-            id: item.id
+        const programs = [];
+        snap.forEach(d => programs.push({ id: d.id, ...d.data() }));
+        programs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+
+        programs.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <div class="item-info">
+              <strong>${escapeHtml(item.title)}</strong>
+              <small>${escapeHtml(item.description ? item.description.substring(0, 80) + '...' : 'No description')}</small>
+            </div>
+            <button class="btn-danger" data-id="${item.id}">🗑️ Delete</button>
+          `;
+          
+          div.querySelector('.btn-danger').addEventListener('click', () => {
+            deleteItem('programs', item.id);
           });
+          
+          list.appendChild(div);
         });
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to load programs", "error");
-        list.innerHTML = '<div class="empty-state">Error loading programs.</div>';
+      } catch (error) {
+        console.error('Error loading programs:', error);
+        list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Error loading programs.</p></div>';
       }
     }
 
+    window.addProgram = async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('prog-title').value.trim();
+      const desc = document.getElementById('prog-desc').value.trim();
+      
+      if (!title) {
+        showToast('Please enter a program title', 'warning');
+        return;
+      }
+      
+      setButtonLoading('prog-submit-btn', true, '✅ Add Program');
+      setFormDisabled('prog-form', true);
+      
+      try {
+        await addDoc(collection(db, "programs"), { title, description: desc });
+        showToast('✅ Program added successfully!', 'success');
+        document.getElementById('prog-form').reset();
+        document.getElementById('prog-title-count').textContent = '0';
+        document.getElementById('prog-desc-count').textContent = '0';
+        await loadPrograms();
+      } catch (error) {
+        console.error('Error adding program:', error);
+        showToast('Error adding program. Please try again.', 'error');
+      } finally {
+        setButtonLoading('prog-submit-btn', false, '✅ Add Program');
+        setFormDisabled('prog-form', false);
+      }
+    };
+
+    // 3. TEAM
     async function loadTeam() {
       const list = document.getElementById('team-list');
-      list.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading team...</div>';
+      list.innerHTML = '<div class="empty-state"><div class="spinner spinner-dark" style="margin: 20px auto;"></div><p>Loading team...</p></div>';
+      
       try {
         const snap = await getDocs(collection(db, "team"));
         document.getElementById('stat-team').innerText = snap.size;
         list.innerHTML = '';
+        
         if (snap.empty) {
-          list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No team members added yet.</p></div>';
+          list.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No team members added yet.</p></div>';
           return;
         }
-        const items = [];
-        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
-        items.sort((a, b) => a.name.localeCompare(b.name));
 
-        items.forEach(item => {
-          renderListItem({
-            list,
-            imageUrl: item.imageUrl,
-            title: item.name,
-            subtitle: item.role || 'No role specified',
-            col: 'team',
-            id: item.id,
-            storagePath: item.storagePath
+        const team = [];
+        snap.forEach(d => team.push({ id: d.id, ...d.data() }));
+        team.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        team.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'list-item';
+          div.innerHTML = `
+            <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2214%22>No Image</text></svg>'">
+            <div class="item-info">
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>${escapeHtml(item.role)}</small>
+            </div>
+            <button class="btn-danger" data-id="${item.id}" data-path="${escapeHtml(item.storagePath)}">🗑️ Delete</button>
+          `;
+          
+          div.querySelector('.btn-danger').addEventListener('click', () => {
+            deleteItem('team', item.id, item.storagePath);
           });
+          
+          list.appendChild(div);
         });
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to load team", "error");
-        list.innerHTML = '<div class="empty-state">Error loading team.</div>';
+      } catch (error) {
+        console.error('Error loading team:', error);
+        list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Error loading team.</p></div>';
       }
     }
 
+    window.addTeam = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('team-name').value.trim();
+      const role = document.getElementById('team-role').value.trim();
+      const file = document.getElementById('team-file').files[0];
+      
+      if (!name) {
+        showToast('Please enter a name', 'warning');
+        return;
+      }
+      if (!role) {
+        showToast('Please enter a role/position', 'warning');
+        return;
+      }
+      if (!file) {
+        showToast('Please choose an image', 'warning');
+        return;
+      }
+      
+      setButtonLoading('team-submit-btn', true, '👤 Add Member');
+      setFormDisabled('team-form', true);
+      
+      try {
+        const safeFileName = sanitizeFileName(file.name);
+        const path = `team/${Date.now()}_${safeFileName}`;
+        const storageRef = ref(storage, path);
+        
+        showToast('Uploading image...', 'info', 5000);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        
+        await addDoc(collection(db, "team"), { 
+          name, 
+          role, 
+          imageUrl: url, 
+          storagePath: path 
+        });
+        
+        showToast('✅ Team member added successfully!', 'success');
+        document.getElementById('team-form').reset();
+        removePreview('team-file', 'team-file-btn', 'team-preview');
+        document.getElementById('team-name-count').textContent = '0';
+        document.getElementById('team-role-count').textContent = '0';
+        await loadTeam();
+      } catch (error) {
+        console.error('Error adding team member:', error);
+        showToast('Error adding team member. Please try again.', 'error');
+      } finally {
+        setButtonLoading('team-submit-btn', false, '👤 Add Member');
+        setFormDisabled('team-form', false);
+      }
+    };
+
+    // 4. SETTINGS
     async function loadSettings() {
       try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
+        
         if (docSnap.exists()) {
           const data = docSnap.data();
           document.getElementById('set-email').value = data.email || '';
@@ -610,105 +1435,17 @@
           document.getElementById('set-address').value = data.address || '';
           document.getElementById('set-wa').value = data.whatsapp || '';
         }
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to load settings", "error");
+      } catch (error) {
+        console.error('Error loading settings:', error);
       }
     }
 
-    // --- ACTIONS ---
-    window.addActivity = async () => {
-      const title = document.getElementById('act-title').value.trim();
-      const desc = document.getElementById('act-desc').value.trim();
-      const file = document.getElementById('act-file').files[0];
-      const btn = document.querySelector('#view-activities .btn-primary');
+    window.saveSettings = async (e) => {
+      e.preventDefault();
       
-      if (!title || !file) return showToast("Please enter a title and choose an image.", "error");
+      setButtonLoading('settings-submit-btn', true, '💾 Save Settings');
+      setFormDisabled('settings-form', true);
       
-      setBtnLoading(btn, true, "Uploading Image...");
-      try {
-        const safeName = sanitizeFilename(file.name);
-        const path = `activities/${Date.now()}_${safeName}`;
-        const storageRef = ref(storage, path);
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        
-        await addDoc(collection(db, "activities"), { 
-          title, description: desc, imageUrl: url, storagePath: path, date: new Date().toISOString() 
-        });
-        
-        showToast("Activity uploaded successfully!");
-        document.getElementById('act-title').value = ''; 
-        document.getElementById('act-desc').value = ''; 
-        document.getElementById('act-file').value = '';
-        document.getElementById('act-file-label').innerText = "📁 Tap to choose an image";
-        document.getElementById('act-file-label').style.borderColor = "var(--border)";
-        document.getElementById('act-file-label').style.color = "var(--text-light)";
-        await loadActivities();
-      } catch (e) {
-        console.error(e);
-        showToast("Upload failed. Please try again.", "error");
-      } finally {
-        setBtnLoading(btn, false);
-      }
-    };
-
-    window.addProgram = async () => {
-      const title = document.getElementById('prog-title').value.trim();
-      const desc = document.getElementById('prog-desc').value.trim();
-      const btn = document.querySelector('#view-programs .btn-primary');
-      if (!title) return showToast("Please enter a program title.", "error");
-      
-      setBtnLoading(btn, true, "Adding Program...");
-      try {
-        await addDoc(collection(db, "programs"), { title, description: desc });
-        showToast("Program added successfully!");
-        document.getElementById('prog-title').value = ''; 
-        document.getElementById('prog-desc').value = '';
-        await loadPrograms();
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to add program.", "error");
-      } finally {
-        setBtnLoading(btn, false);
-      }
-    };
-
-    window.addTeam = async () => {
-      const name = document.getElementById('team-name').value.trim();
-      const role = document.getElementById('team-role').value.trim();
-      const file = document.getElementById('team-file').files[0];
-      const btn = document.querySelector('#view-team .btn-primary');
-      if (!name || !file) return showToast("Please enter a name and choose an image.", "error");
-      
-      setBtnLoading(btn, true, "Uploading Image...");
-      try {
-        const safeName = sanitizeFilename(file.name);
-        const path = `team/${Date.now()}_${safeName}`;
-        const storageRef = ref(storage, path);
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        
-        await addDoc(collection(db, "team"), { name, role, imageUrl: url, storagePath: path });
-        showToast("Team member added successfully!");
-        document.getElementById('team-name').value = ''; 
-        document.getElementById('team-role').value = ''; 
-        document.getElementById('team-file').value = '';
-        document.getElementById('team-file-label').innerText = "📁 Tap to choose an image";
-        document.getElementById('team-file-label').style.borderColor = "var(--border)";
-        document.getElementById('team-file-label').style.color = "var(--text-light)";
-        await loadTeam();
-      } catch (e) {
-        console.error(e);
-        showToast("Upload failed. Please try again.", "error");
-      } finally {
-        setBtnLoading(btn, false);
-      }
-    };
-
-    window.saveSettings = async () => {
-      const btn = document.querySelector('#view-settings .btn-primary');
-      setBtnLoading(btn, true, "Saving...");
       try {
         await setDoc(doc(db, "settings", "general"), {
           email: document.getElementById('set-email').value.trim(),
@@ -716,35 +1453,66 @@
           address: document.getElementById('set-address').value.trim(),
           whatsapp: document.getElementById('set-wa').value.trim()
         });
-        showToast("Settings saved successfully!");
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to save settings.", "error");
+        
+        showToast('✅ Settings saved successfully!', 'success');
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        showToast('Error saving settings. Please try again.', 'error');
       } finally {
-        setBtnLoading(btn, false);
+        setButtonLoading('settings-submit-btn', false, '💾 Save Settings');
+        setFormDisabled('settings-form', false);
       }
     };
 
-    // --- DELETE FUNCTION ---
+    // ============ DELETE FUNCTION ============
+    
     window.deleteItem = async (col, id, path) => {
-      if (!confirm("Are you sure you want to delete this? This cannot be undone.")) return;
-      try {
-        if (path) {
-          try { await deleteObject(ref(storage, path)); } catch (e) { console.warn("Storage delete skipped or failed", e); }
+      showConfirm(
+        'Confirm Delete',
+        'Are you sure you want to delete this item? This action cannot be undone.',
+        async () => {
+          try {
+            // Delete image from storage if path exists
+            if (path) {
+              try {
+                await deleteObject(ref(storage, path));
+              } catch (storageError) {
+                console.log('Storage delete skipped:', storageError.message);
+              }
+            }
+            
+            // Delete document from Firestore
+            await deleteDoc(doc(db, col, id));
+            showToast('✅ Item deleted successfully!', 'success');
+            await loadAllData();
+          } catch (error) {
+            console.error('Error deleting item:', error);
+            showToast('Error deleting item. Please try again.', 'error');
+          }
         }
-        await deleteDoc(doc(db, col, id));
-        showToast("Deleted successfully!");
-        
-        // Reload only the affected view for better performance
-        if (col === 'activities') loadActivities();
-        else if (col === 'programs') loadPrograms();
-        else if (col === 'team') loadTeam();
-        else loadAllData();
-      } catch (e) {
-        console.error(e);
-        showToast("Failed to delete item.", "error");
-      }
+      );
     };
+
+    // ============ KEYBOARD SHORTCUTS ============
+    
+    // Enter key to submit forms
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        const form = e.target.closest('form');
+        if (form) {
+          e.preventDefault();
+          form.requestSubmit();
+        }
+      }
+    });
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
   </script>
 </body>
-</html>
+  </html>
