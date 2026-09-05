@@ -42,7 +42,7 @@
       width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
       border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s;
     }
-    .login-box button:hover { background: var(--primary-dark); }
+    .login-box button:hover:not(:disabled) { background: var(--primary-dark); }
     #login-error { color: var(--danger); margin-top: 15px; font-size: 14px; min-height: 20px; }
 
     /* --- MAIN APP LAYOUT --- */
@@ -50,14 +50,15 @@
 
     /* Top Header */
     .top-header {
-      background: var(--primary); color: white; padding: 15px 20px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: white; padding: 15px 20px;
       display: flex; justify-content: space-between; align-items: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
     }
     .top-header h1 { font-size: 18px; font-weight: 600; }
     .logout-btn {
       background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px;
-      border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500;
+      border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.3s;
     }
     .logout-btn:hover { background: rgba(255,255,255,0.3); }
 
@@ -114,6 +115,7 @@
     .file-upload-btn {
       display: block; width: 100%; padding: 12px; background: #f8f9fa; border: 2px dashed var(--border);
       border-radius: 8px; text-align: center; cursor: pointer; color: var(--text-light); font-size: 14px;
+      transition: 0.3s;
     }
     .file-upload-btn:hover { border-color: var(--primary); color: var(--primary); }
     .file-upload-wrapper input[type="file"] {
@@ -125,7 +127,9 @@
       width: 100%; padding: 14px; background: var(--primary); color: white; border: none;
       border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s;
     }
-    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+    
     .btn-danger {
       background: var(--danger); color: white; border: none; padding: 8px 16px;
       border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
@@ -137,16 +141,56 @@
       display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border);
     }
     .list-item:last-child { border-bottom: none; }
-    .list-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px; background: #eee; }
-    .item-info { flex: 1; }
-    .item-info strong { display: block; font-size: 15px; margin-bottom: 4px; }
-    .item-info small { color: var(--text-light); font-size: 13px; }
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
+    .list-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px; background: #eee; flex-shrink: 0; }
+    .item-info { flex: 1; overflow: hidden; }
+    .item-info strong { display: block; font-size: 15px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-info small { color: var(--text-light); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .empty-state, .loading-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
+    .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
 
-    .status-msg { margin-top: 15px; font-weight: 600; text-align: center; font-size: 14px; min-height: 20px; }
-    .status-success { color: var(--success); }
-    .status-error { color: var(--danger); }
-    .status-loading { color: var(--primary); }
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast Notifications */
+    #toast {
+      visibility: hidden;
+      min-width: 280px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 16px;
+      position: fixed;
+      z-index: 9999;
+      right: 20px;
+      bottom: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: visibility 0s, opacity 0.4s ease, transform 0.4s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #toast.success { background-color: var(--success); }
+    #toast.error { background-color: var(--danger); }
+    #toast.info { background-color: var(--primary); }
 
     /* Desktop adjustments */
     @media (min-width: 768px) {
@@ -154,10 +198,14 @@
       .main-content { padding: 40px; }
       .nav-tabs { justify-content: center; }
       .nav-tab { padding: 20px 30px; font-size: 16px; }
+      .list-item img { width: 80px; height: 80px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast"></div>
 
   <!-- LOGIN SCREEN -->
   <div id="login-screen">
@@ -208,22 +256,21 @@
         <div class="card">
           <h3>Add New Activity</h3>
           <div class="form-group">
-            <label>Activity Title</label>
+            <label for="act-title">Activity Title</label>
             <input type="text" id="act-title" placeholder="e.g., Sallah Outreach 2024">
           </div>
           <div class="form-group">
-            <label>Description</label>
+            <label for="act-desc">Description</label>
             <textarea id="act-desc" placeholder="Brief description of the activity..."></textarea>
           </div>
           <div class="form-group">
             <label>Upload Image</label>
             <div class="file-upload-wrapper">
-              <div class="file-upload-btn" id="act-file-label"> Tap to choose an image</div>
+              <div class="file-upload-btn" id="act-file-label">📁 Tap to choose an image</div>
               <input type="file" id="act-file" accept="image/*" onchange="updateFileLabel('act-file', 'act-file-label')">
             </div>
           </div>
           <button class="btn-primary" onclick="addActivity()">Upload Activity</button>
-          <p id="act-status" class="status-msg"></p>
         </div>
         <div class="card">
           <h3>Existing Activities</h3>
@@ -237,15 +284,14 @@
         <div class="card">
           <h3>Add New Program</h3>
           <div class="form-group">
-            <label>Program Title</label>
+            <label for="prog-title">Program Title</label>
             <input type="text" id="prog-title" placeholder="e.g., Education Support">
           </div>
           <div class="form-group">
-            <label>Description</label>
+            <label for="prog-desc">Description</label>
             <textarea id="prog-desc" placeholder="Describe the program..."></textarea>
           </div>
           <button class="btn-primary" onclick="addProgram()">Add Program</button>
-          <p id="prog-status" class="status-msg"></p>
         </div>
         <div class="card">
           <h3>Existing Programs</h3>
@@ -259,11 +305,11 @@
         <div class="card">
           <h3>Add Team Member</h3>
           <div class="form-group">
-            <label>Full Name</label>
+            <label for="team-name">Full Name</label>
             <input type="text" id="team-name" placeholder="e.g., Amb. Abbas Ibn Saad">
           </div>
           <div class="form-group">
-            <label>Role / Position</label>
+            <label for="team-role">Role / Position</label>
             <input type="text" id="team-role" placeholder="e.g., Founder">
           </div>
           <div class="form-group">
@@ -274,7 +320,6 @@
             </div>
           </div>
           <button class="btn-primary" onclick="addTeam()">Add Member</button>
-          <p id="team-status" class="status-msg"></p>
         </div>
         <div class="card">
           <h3>Current Team</h3>
@@ -288,23 +333,22 @@
         <div class="card">
           <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;">Update these details to change the contact information across your entire website.</p>
           <div class="form-group">
-            <label>Email Address</label>
+            <label for="set-email">Email Address</label>
             <input type="email" id="set-email">
           </div>
           <div class="form-group">
-            <label>Phone Number</label>
+            <label for="set-phone">Phone Number</label>
             <input type="text" id="set-phone">
           </div>
           <div class="form-group">
-            <label>Office Address</label>
+            <label for="set-address">Office Address</label>
             <textarea id="set-address" rows="3"></textarea>
           </div>
           <div class="form-group">
-            <label>WhatsApp Number (Country code + number, no + sign)</label>
+            <label for="set-wa">WhatsApp Number (Country code + number, no + sign)</label>
             <input type="text" id="set-wa" placeholder="e.g., 2348063182224">
           </div>
           <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
-          <p id="set-status" class="status-msg"></p>
         </div>
       </div>
 
@@ -313,9 +357,11 @@
 
   <!-- FIREBASE LOGIC -->
   <script type="module">
+    // 📌 NOTE: Ensure your Firestore and Storage Rules are set to allow read/write ONLY for authenticated users!
+    
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     const firebaseConfig = {
@@ -332,21 +378,53 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    // --- GLOBAL UI HELPERS ---
+    window.showToast = (msg, type = 'success') => {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = `toast show ${type}`;
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    };
+
+    window.setBtnLoading = (btn, isLoading, loadingText = "Processing...") => {
+      if (!btn) return;
+      if (isLoading) {
+        btn.dataset.originalText = btn.innerHTML; 
+        btn.innerHTML = `<span class="spinner"></span> ${loadingText}`;
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = btn.dataset.originalText || "Submit";
+        btn.disabled = false;
+      }
+    };
+
+    window.sanitizeFilename = (name) => name.replace(/[^a-zA-Z0-9._-]/g, '_');
+
     // --- AUTHENTICATION ---
     window.handleLogin = () => {
-      const email = document.getElementById('login-email').value;
+      const email = document.getElementById('login-email').value.trim();
       const pass = document.getElementById('login-pass').value;
-      const errorEl = document.getElementById('login-error');
-      errorEl.innerText = "Signing in...";
-      errorEl.style.color = "var(--primary)";
+      const btn = document.querySelector('#login-screen button');
+      
+      if (!email || !pass) return showToast("Please enter your email and password.", "error");
+      
+      setBtnLoading(btn, true, "Signing in...");
       
       signInWithEmailAndPassword(auth, email, pass).catch(e => {
-        errorEl.innerText = "Invalid email or password.";
-        errorEl.style.color = "var(--danger)";
+        showToast("Invalid email or password.", "error");
+        setBtnLoading(btn, false);
       });
     };
 
-    window.handleLogout = () => signOut(auth);
+    window.handleLogout = async () => {
+      if (!confirm("Are you sure you want to logout?")) return;
+      try {
+        await signOut(auth);
+      } catch (e) {
+        showToast("Logout failed.", "error");
+      }
+    };
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -356,6 +434,9 @@
       } else {
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('app-container').style.display = 'none';
+        // Reset login button state
+        const loginBtn = document.querySelector('#login-screen button');
+        if (loginBtn) setBtnLoading(loginBtn, false);
       }
     });
 
@@ -364,201 +445,305 @@
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
       document.getElementById(`view-${viewName}`).classList.add('active');
-      if(tabElement) tabElement.classList.add('active');
+      if (tabElement) tabElement.classList.add('active');
     };
 
-    // Helper for file input label
     window.updateFileLabel = (inputId, labelId) => {
       const fileInput = document.getElementById(inputId);
       const label = document.getElementById(labelId);
-      if (fileInput.files.length > 0) {
+      if (fileInput && fileInput.files.length > 0) {
         label.innerText = "✅ " + fileInput.files[0].name;
         label.style.borderColor = "var(--success)";
         label.style.color = "var(--success)";
       }
     };
 
+    // --- DOM BUILDER HELPER ---
+    function renderListItem({ list, imageUrl, title, subtitle, onDelete, col, id, storagePath }) {
+      const div = document.createElement('div');
+      div.className = 'list-item';
+
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = title;
+        img.onerror = function() { this.src = 'https://via.placeholder.com/60/e1e4e8/7f8c8d?text=No+Image'; };
+        div.appendChild(img);
+      }
+
+      const info = document.createElement('div');
+      info.className = 'item-info';
+      const strong = document.createElement('strong');
+      strong.textContent = title;
+      const small = document.createElement('small');
+      small.textContent = subtitle || 'No description';
+      info.appendChild(strong);
+      info.appendChild(small);
+      div.appendChild(info);
+
+      const btn = document.createElement('button');
+      btn.className = 'btn-danger';
+      btn.textContent = 'Delete';
+      btn.onclick = () => deleteItem(col, id, storagePath);
+      div.appendChild(btn);
+
+      list.appendChild(div);
+    }
+
     // --- DATA LOADING ---
     async function loadAllData() {
-      loadActivities();
-      loadPrograms();
-      loadTeam();
-      loadSettings();
+      // Load all concurrently, allowing others to succeed even if one fails
+      await Promise.allSettled([
+        loadActivities(),
+        loadPrograms(),
+        loadTeam(),
+        loadSettings()
+      ]);
     }
 
-    // 1. ACTIVITIES
     async function loadActivities() {
       const list = document.getElementById('act-list');
-      list.innerHTML = '<div class="empty-state">Loading activities...</div>';
-      const snap = await getDocs(query(collection(db, "activities"), orderBy("date", "desc")));
-      document.getElementById('stat-act').innerText = snap.size;
-      list.innerHTML = '';
-      if(snap.empty) {
-        list.innerHTML = '<div class="empty-state">No activities uploaded yet.</div>';
-        return;
+      list.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading activities...</div>';
+      try {
+        const snap = await getDocs(collection(db, "activities"));
+        document.getElementById('stat-act').innerText = snap.size;
+        list.innerHTML = '';
+        if (snap.empty) {
+          list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No activities uploaded yet.</p></div>';
+          return;
+        }
+        const items = [];
+        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+        // Sort client-side to avoid Firestore index requirements
+        items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        items.forEach(item => {
+          renderListItem({
+            list,
+            imageUrl: item.imageUrl,
+            title: item.title,
+            subtitle: item.description ? item.description.substring(0, 80) + '...' : 'No description',
+            col: 'activities',
+            id: item.id,
+            storagePath: item.storagePath
+          });
+        });
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to load activities", "error");
+        list.innerHTML = '<div class="empty-state">Error loading activities.</div>';
       }
-      snap.forEach(d => {
-        const data = d.data();
-        list.innerHTML += `
-          <div class="list-item">
-            <img src="${data.imageUrl}" alt="${data.title}">
-            <div class="item-info">
-              <strong>${data.title}</strong>
-              <small>${data.description ? data.description.substring(0,60) + '...' : 'No description'}</small>
-            </div>
-            <button class="btn-danger" onclick="deleteItem('activities', '${d.id}', '${data.storagePath}')">Delete</button>
-          </div>`;
-      });
     }
 
-    window.addActivity = async () => {
-      const title = document.getElementById('act-title').value;
-      const desc = document.getElementById('act-desc').value;
-      const file = document.getElementById('act-file').files[0];
-      const status = document.getElementById('act-status');
-      if(!title || !file) return alert("Please enter a title and choose an image.");
-      
-      status.innerText = "Uploading image... Please wait.";
-      status.className = "status-msg status-loading";
-      
-      const path = `activities/${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      
-      await addDoc(collection(db, "activities"), { title, description: desc, imageUrl: url, storagePath: path, date: new Date().toISOString() });
-      
-      status.innerText = "✅ Activity uploaded successfully!";
-      status.className = "status-msg status-success";
-      document.getElementById('act-title').value = ''; document.getElementById('act-desc').value = ''; document.getElementById('act-file').value = '';
-      document.getElementById('act-file-label').innerText = "📁 Tap to choose an image";
-      document.getElementById('act-file-label').style.borderColor = "var(--border)";
-      document.getElementById('act-file-label').style.color = "var(--text-light)";
-      loadActivities();
-    };
-
-    // 2. PROGRAMS
     async function loadPrograms() {
       const list = document.getElementById('prog-list');
-      const snap = await getDocs(collection(db, "programs"));
-      document.getElementById('stat-prog').innerText = snap.size;
-      list.innerHTML = '';
-      if(snap.empty) {
-        list.innerHTML = '<div class="empty-state">No programs added yet.</div>';
-        return;
+      list.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading programs...</div>';
+      try {
+        const snap = await getDocs(collection(db, "programs"));
+        document.getElementById('stat-prog').innerText = snap.size;
+        list.innerHTML = '';
+        if (snap.empty) {
+          list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No programs added yet.</p></div>';
+          return;
+        }
+        const items = [];
+        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+        items.sort((a, b) => a.title.localeCompare(b.title));
+
+        items.forEach(item => {
+          renderListItem({
+            list,
+            title: item.title,
+            subtitle: item.description ? item.description.substring(0, 80) + '...' : 'No description',
+            col: 'programs',
+            id: item.id
+          });
+        });
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to load programs", "error");
+        list.innerHTML = '<div class="empty-state">Error loading programs.</div>';
       }
-      snap.forEach(d => {
-        const data = d.data();
-        list.innerHTML += `
-          <div class="list-item">
-            <div class="item-info">
-              <strong>${data.title}</strong>
-              <small>${data.description ? data.description.substring(0,60) + '...' : 'No description'}</small>
-            </div>
-            <button class="btn-danger" onclick="deleteItem('programs', '${d.id}')">Delete</button>
-          </div>`;
-      });
     }
 
-    window.addProgram = async () => {
-      const title = document.getElementById('prog-title').value;
-      const desc = document.getElementById('prog-desc').value;
-      const status = document.getElementById('prog-status');
-      if(!title) return alert("Please enter a program title.");
-      
-      await addDoc(collection(db, "programs"), { title, description: desc });
-      status.innerText = "✅ Program added successfully!";
-      status.className = "status-msg status-success";
-      document.getElementById('prog-title').value = ''; document.getElementById('prog-desc').value = '';
-      loadPrograms();
-    };
-
-    // 3. TEAM
     async function loadTeam() {
       const list = document.getElementById('team-list');
-      const snap = await getDocs(collection(db, "team"));
-      document.getElementById('stat-team').innerText = snap.size;
-      list.innerHTML = '';
-      if(snap.empty) {
-        list.innerHTML = '<div class="empty-state">No team members added yet.</div>';
-        return;
+      list.innerHTML = '<div class="loading-state"><span class="spinner"></span> Loading team...</div>';
+      try {
+        const snap = await getDocs(collection(db, "team"));
+        document.getElementById('stat-team').innerText = snap.size;
+        list.innerHTML = '';
+        if (snap.empty) {
+          list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No team members added yet.</p></div>';
+          return;
+        }
+        const items = [];
+        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+        items.sort((a, b) => a.name.localeCompare(b.name));
+
+        items.forEach(item => {
+          renderListItem({
+            list,
+            imageUrl: item.imageUrl,
+            title: item.name,
+            subtitle: item.role || 'No role specified',
+            col: 'team',
+            id: item.id,
+            storagePath: item.storagePath
+          });
+        });
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to load team", "error");
+        list.innerHTML = '<div class="empty-state">Error loading team.</div>';
       }
-      snap.forEach(d => {
-        const data = d.data();
-        list.innerHTML += `
-          <div class="list-item">
-            <img src="${data.imageUrl}" alt="${data.name}">
-            <div class="item-info">
-              <strong>${data.name}</strong>
-              <small>${data.role}</small>
-            </div>
-            <button class="btn-danger" onclick="deleteItem('team', '${d.id}', '${data.storagePath}')">Delete</button>
-          </div>`;
-      });
     }
 
-    window.addTeam = async () => {
-      const name = document.getElementById('team-name').value;
-      const role = document.getElementById('team-role').value;
-      const file = document.getElementById('team-file').files[0];
-      const status = document.getElementById('team-status');
-      if(!name || !file) return alert("Please enter a name and choose an image.");
+    async function loadSettings() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById('set-email').value = data.email || '';
+          document.getElementById('set-phone').value = data.phone || '';
+          document.getElementById('set-address').value = data.address || '';
+          document.getElementById('set-wa').value = data.whatsapp || '';
+        }
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to load settings", "error");
+      }
+    }
+
+    // --- ACTIONS ---
+    window.addActivity = async () => {
+      const title = document.getElementById('act-title').value.trim();
+      const desc = document.getElementById('act-desc').value.trim();
+      const file = document.getElementById('act-file').files[0];
+      const btn = document.querySelector('#view-activities .btn-primary');
       
-      status.innerText = "Uploading image... Please wait.";
-      status.className = "status-msg status-loading";
+      if (!title || !file) return showToast("Please enter a title and choose an image.", "error");
       
-      const path = `team/${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      
-      await addDoc(collection(db, "team"), { name, role, imageUrl: url, storagePath: path });
-      status.innerText = "✅ Team member added successfully!";
-      status.className = "status-msg status-success";
-      document.getElementById('team-name').value = ''; document.getElementById('team-role').value = ''; document.getElementById('team-file').value = '';
-      document.getElementById('team-file-label').innerText = "📁 Tap to choose an image";
-      document.getElementById('team-file-label').style.borderColor = "var(--border)";
-      document.getElementById('team-file-label').style.color = "var(--text-light)";
-      loadTeam();
+      setBtnLoading(btn, true, "Uploading Image...");
+      try {
+        const safeName = sanitizeFilename(file.name);
+        const path = `activities/${Date.now()}_${safeName}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        
+        await addDoc(collection(db, "activities"), { 
+          title, description: desc, imageUrl: url, storagePath: path, date: new Date().toISOString() 
+        });
+        
+        showToast("Activity uploaded successfully!");
+        document.getElementById('act-title').value = ''; 
+        document.getElementById('act-desc').value = ''; 
+        document.getElementById('act-file').value = '';
+        document.getElementById('act-file-label').innerText = "📁 Tap to choose an image";
+        document.getElementById('act-file-label').style.borderColor = "var(--border)";
+        document.getElementById('act-file-label').style.color = "var(--text-light)";
+        await loadActivities();
+      } catch (e) {
+        console.error(e);
+        showToast("Upload failed. Please try again.", "error");
+      } finally {
+        setBtnLoading(btn, false);
+      }
     };
 
-    // 4. SETTINGS
-    async function loadSettings() {
-      const docRef = doc(db, "settings", "general");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        document.getElementById('set-email').value = data.email || '';
-        document.getElementById('set-phone').value = data.phone || '';
-        document.getElementById('set-address').value = data.address || '';
-        document.getElementById('set-wa').value = data.whatsapp || '';
+    window.addProgram = async () => {
+      const title = document.getElementById('prog-title').value.trim();
+      const desc = document.getElementById('prog-desc').value.trim();
+      const btn = document.querySelector('#view-programs .btn-primary');
+      if (!title) return showToast("Please enter a program title.", "error");
+      
+      setBtnLoading(btn, true, "Adding Program...");
+      try {
+        await addDoc(collection(db, "programs"), { title, description: desc });
+        showToast("Program added successfully!");
+        document.getElementById('prog-title').value = ''; 
+        document.getElementById('prog-desc').value = '';
+        await loadPrograms();
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to add program.", "error");
+      } finally {
+        setBtnLoading(btn, false);
       }
-    }
+    };
+
+    window.addTeam = async () => {
+      const name = document.getElementById('team-name').value.trim();
+      const role = document.getElementById('team-role').value.trim();
+      const file = document.getElementById('team-file').files[0];
+      const btn = document.querySelector('#view-team .btn-primary');
+      if (!name || !file) return showToast("Please enter a name and choose an image.", "error");
+      
+      setBtnLoading(btn, true, "Uploading Image...");
+      try {
+        const safeName = sanitizeFilename(file.name);
+        const path = `team/${Date.now()}_${safeName}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        
+        await addDoc(collection(db, "team"), { name, role, imageUrl: url, storagePath: path });
+        showToast("Team member added successfully!");
+        document.getElementById('team-name').value = ''; 
+        document.getElementById('team-role').value = ''; 
+        document.getElementById('team-file').value = '';
+        document.getElementById('team-file-label').innerText = "📁 Tap to choose an image";
+        document.getElementById('team-file-label').style.borderColor = "var(--border)";
+        document.getElementById('team-file-label').style.color = "var(--text-light)";
+        await loadTeam();
+      } catch (e) {
+        console.error(e);
+        showToast("Upload failed. Please try again.", "error");
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    };
 
     window.saveSettings = async () => {
-      const status = document.getElementById('set-status');
-      status.innerText = "Saving...";
-      status.className = "status-msg status-loading";
-      
-      await setDoc(doc(db, "settings", "general"), {
-        email: document.getElementById('set-email').value,
-        phone: document.getElementById('set-phone').value,
-        address: document.getElementById('set-address').value,
-        whatsapp: document.getElementById('set-wa').value
-      });
-      status.innerText = "✅ Settings saved successfully!";
-      status.className = "status-msg status-success";
+      const btn = document.querySelector('#view-settings .btn-primary');
+      setBtnLoading(btn, true, "Saving...");
+      try {
+        await setDoc(doc(db, "settings", "general"), {
+          email: document.getElementById('set-email').value.trim(),
+          phone: document.getElementById('set-phone').value.trim(),
+          address: document.getElementById('set-address').value.trim(),
+          whatsapp: document.getElementById('set-wa').value.trim()
+        });
+        showToast("Settings saved successfully!");
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to save settings.", "error");
+      } finally {
+        setBtnLoading(btn, false);
+      }
     };
 
     // --- DELETE FUNCTION ---
     window.deleteItem = async (col, id, path) => {
-      if(!confirm("Are you sure you want to delete this? This cannot be undone.")) return;
-      
-      if(path) {
-        try { await deleteObject(ref(storage, path)); } catch(e){ console.log("Image delete skipped"); }
+      if (!confirm("Are you sure you want to delete this? This cannot be undone.")) return;
+      try {
+        if (path) {
+          try { await deleteObject(ref(storage, path)); } catch (e) { console.warn("Storage delete skipped or failed", e); }
+        }
+        await deleteDoc(doc(db, col, id));
+        showToast("Deleted successfully!");
+        
+        // Reload only the affected view for better performance
+        if (col === 'activities') loadActivities();
+        else if (col === 'programs') loadPrograms();
+        else if (col === 'team') loadTeam();
+        else loadAllData();
+      } catch (e) {
+        console.error(e);
+        showToast("Failed to delete item.", "error");
       }
-      await deleteDoc(doc(db, col, id));
-      loadAllData();
     };
   </script>
 </body>
