@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body data-page="programs">
 
 <header class="header">
   <a href="index.html" class="logo">
@@ -37,7 +37,7 @@
 <section class="section">
   <h2>What We Do</h2>
 
-  <div class="cards">
+  <div class="cards" data-list="programsFull">
 
     <div class="card">
       <img src="https://i.imgur.com/ucL9wet.jpeg" alt="Conflict Resolution and Security Sensitization">
@@ -107,8 +107,8 @@
 
 <footer class="footer">
   <h3>Dandi Concerned Citizen Initiatives</h3>
-  <p>Email: dandiconcernedcitizenscci@gmail.com</p>
-  <p>Phone: +234 806 318 2224</p>
+  <p>Email: <span data-field="footerEmail">dandiconcernedcitizenscci@gmail.com</span></p>
+  <p>Phone: <span data-field="footerPhone">+234 806 318 2224</span></p>
   <p>&copy; 2026 Dandi Concerned Citizen Initiatives. All Rights Reserved.</p>
 </footer>
 
@@ -127,5 +127,6 @@
 </div>
 
 <script src="app.js"></script>
+<script type="module" src="assets/site-content.js"></script>
 </body>
 </html>

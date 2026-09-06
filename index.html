@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-<body>
+<body data-page="home">
 
 <header class="header">
   <a href="index.html" class="logo">
@@ -31,8 +31,8 @@
 
 <section class="hero">
   <div class="hero-content">
-    <h1>Changing Lives, Building Hope</h1>
-    <p>
+    <h1 data-field="heroTitle">Changing Lives, Building Hope</h1>
+    <p data-field="heroSubtitle">
       We support communities through peace sensitization, education, food support,
       healthcare, youth development, women empowerment, and community projects.
     </p>
@@ -46,25 +46,25 @@
 
 <section class="stats">
   <div>
-    <h2>5,000+</h2>
-    <p>Lives Impacted</p>
+    <h2 data-field="stat1Number">5,000+</h2>
+    <p data-field="stat1Label">Lives Impacted</p>
   </div>
 
   <div>
-    <h2>25+</h2>
-    <p>Communities Reached</p>
+    <h2 data-field="stat2Number">25+</h2>
+    <p data-field="stat2Label">Communities Reached</p>
   </div>
 
   <div>
-    <h2>7+</h2>
-    <p>Core Programs</p>
+    <h2 data-field="stat3Number">7+</h2>
+    <p data-field="stat3Label">Core Programs</p>
   </div>
 </section>
 
 <section class="section">
   <h2>What We Do</h2>
 
-  <div class="cards">
+  <div class="cards" data-list="homeCards">
 
     <div class="card">
       <h3>Conflict Resolution & Security Sensitization</h3>
@@ -127,8 +127,8 @@
 
 <footer class="footer">
   <h3>Dandi Concerned Citizen Initiatives</h3>
-  <p>Email: dandiconcernedcitizenscci@gmail.com</p>
-  <p>Phone: +234 806 318 2224</p>
+  <p>Email: <span data-field="footerEmail">dandiconcernedcitizenscci@gmail.com</span></p>
+  <p>Phone: <span data-field="footerPhone">+234 806 318 2224</span></p>
   <p>&copy; 2026 Dandi Concerned Citizen Initiatives. All Rights Reserved.</p>
 </footer>
 
@@ -147,5 +147,6 @@
 </div>
 
 <script src="app.js"></script>
+<script type="module" src="assets/site-content.js"></script>
 </body>
 </html>

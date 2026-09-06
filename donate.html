@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Donate - DANDI CONCERNED CITIZEN INITIATIVES</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body data-page="donate">
 
 <header class="header">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-   <a href="index.html" class="logo">
-  <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
-  <span>DANDI CCI</span>
+  <a href="index.html" class="logo">
+    <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
+    <span>DANDI CCI</span>
+  </a>
 
   <nav id="navMenu">
     <a href="index.html">Home</a>
@@ -28,7 +29,7 @@
 <section class="hero" style="background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url('https://i.imgur.com/LQar60u.jpeg') center/cover;">
   <div class="hero-content">
     <h1>Make a Donation</h1>
-    <p>Your gift helps us provide education, food, healthcare, and hope to people in need.</p>
+    <p data-field="donateHeroText">Your gift helps us provide education, food, healthcare, and hope to people in need.</p>
   </div>
 </section>
 
@@ -37,20 +38,20 @@
 
   <div class="cards">
     <div class="card">
-      <h3>₦5,000</h3>
-      <p>Helps provide school materials for a child.</p>
+      <h3 data-field="tier1Amount">₦5,000</h3>
+      <p data-field="tier1Text">Helps provide school materials for a child.</p>
       <a href="#bank-details" class="btn">Donate</a>
     </div>
 
     <div class="card">
-      <h3>₦10,000</h3>
-      <p>Supports food packages for families.</p>
+      <h3 data-field="tier2Amount">₦10,000</h3>
+      <p data-field="tier2Text">Supports food packages for families.</p>
       <a href="#bank-details" class="btn">Donate</a>
     </div>
 
     <div class="card">
-      <h3>₦25,000</h3>
-      <p>Supports healthcare outreach and community aid.</p>
+      <h3 data-field="tier3Amount">₦25,000</h3>
+      <p data-field="tier3Text">Supports healthcare outreach and community aid.</p>
       <a href="#bank-details" class="btn">Donate</a>
     </div>
   </div>
@@ -60,10 +61,10 @@
   <h2>Bank Transfer Details</h2>
 
   <div class="card" style="max-width: 600px; margin: auto; text-align: left;">
-    <p><strong>Bank Name:</strong> Your Bank Name</p>
-    <p><strong>Account Name:</strong> Hope Foundation NGO</p>
-    <p><strong>Account Number:</strong> 0000000000</p>
-    <p><strong>Reference:</strong> Donation</p>
+    <p><strong>Bank Name:</strong> <span data-field="bankName">Your Bank Name</span></p>
+    <p><strong>Account Name:</strong> <span data-field="accountName">Hope Foundation NGO</span></p>
+    <p><strong>Account Number:</strong> <span data-field="accountNumber">0000000000</span></p>
+    <p><strong>Reference:</strong> <span data-field="reference">Donation</span></p>
   </div>
 </section>
 
@@ -87,10 +88,11 @@
 
 <footer class="footer">
   <h3>Dandi Concerned Citizen Initiatives</h3>
-  <p>Email: dandiconcernedcitizenscci@gmail.com</p>
-  <p>Phone: +234 806 318 2224</p>
+  <p>Email: <span data-field="footerEmail">dandiconcernedcitizenscci@gmail.com</span></p>
+  <p>Phone: <span data-field="footerPhone">+234 806 318 2224</span></p>
   <p>&copy; 2026 Dandi Concerned Citizen Initiatives. All Rights Reserved.</p>
 </footer>
+
 <a href="#" id="openWhatsapp" class="whatsapp">
   <i class="fab fa-whatsapp"></i>
 </a>
@@ -108,5 +110,6 @@
 </div>
 
 <script src="app.js"></script>
+<script type="module" src="assets/site-content.js"></script>
 </body>
 </html>

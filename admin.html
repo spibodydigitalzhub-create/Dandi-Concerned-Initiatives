@@ -1,366 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - Dandi CCI</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .admin-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    .card-box { background: #f9f9f9; border-radius: 10px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .admin-form input, .admin-form textarea { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; }
-    .item-list-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-    .item-list-row img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
-    .btn-danger { background: #d9534f; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
-    .hidden { display: none !important; }
-    .status-msg { margin-top: 10px; font-weight: bold; color: #0b5d3b; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Dandi CCI</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin.css">
 </head>
-<body>
+<body class="admin-body">
 
-<header class="header">
-  <a href="index.html" class="logo"><span>DANDI CCI ADMIN</span></a>
-  <button id="logoutBtn" class="btn hidden" style="background:#d9534f">Logout</button>
-</header>
-
-<div class="admin-container">
-  
-  <!-- LOGIN SECTION -->
-  <div id="loginBox" class="card-box" style="max-width:400px; margin: 50px auto;">
-    <h2>Admin Login</h2>
-    <form id="loginForm" class="admin-form">
-      <input type="email" id="adminEmail" placeholder="Email" required>
-      <input type="password" id="adminPass" placeholder="Password" required>
-      <button type="submit" class="btn" style="width:100%;">Sign In</button>
-      <p id="loginError" style="color:red; margin-top:10px;" class="hidden"></p>
-    </form>
-  </div>
-
-  <!-- DASHBOARD PANEL -->
-  <div id="dashboardPanel" class="hidden">
-    
-    <!-- ADD / EDIT ACTIVITY GALLERY ITEM -->
-    <div class="card-box">
-      <h3 id="actFormTitle">Add New Activity / Photo</h3>
-      <form id="activityForm" class="admin-form">
-        <input type="hidden" id="actDocId">
-        <input type="hidden" id="actExistingUrl">
-        
-        <label>Activity Title:</label>
-        <input type="text" id="actTitle" placeholder="e.g. Sallah Outreach" required>
-        
-        <label>Select Image File from Device:</label>
-        <input type="file" id="actFileInput" accept="image/*">
-        
-        <button type="submit" class="btn" id="actSubmitBtn">Save Activity</button>
-        <button type="button" class="btn hidden" id="actCancelBtn" style="background:#888;">Cancel Edit</button>
-        <div id="actStatus" class="status-msg"></div>
-      </form>
-    </div>
-
-    <!-- LIST OF ACTIVITIES -->
-    <div class="card-box">
-      <h3>Manage Gallery Activities</h3>
-      <div id="activitiesList">Loading activities...</div>
-    </div>
-
-    <!-- ADD / EDIT TEAM MEMBERS -->
-    <div class="card-box">
-      <h3 id="teamFormTitle">Add Leadership Team Member</h3>
-      <form id="teamForm" class="admin-form">
-        <input type="hidden" id="teamDocId">
-        <input type="hidden" id="teamExistingUrl">
-        
-        <label>Full Name:</label>
-        <input type="text" id="teamName" placeholder="e.g. Amb. Abbas Ibn Saad" required>
-        
-        <label>Role:</label>
-        <input type="text" id="teamRole" placeholder="e.g. Founder" required>
-        
-        <label>Select Profile Photo:</label>
-        <input type="file" id="teamFileInput" accept="image/*">
-        
-        <button type="submit" class="btn" id="teamSubmitBtn">Save Member</button>
-        <button type="button" class="btn hidden" id="teamCancelBtn" style="background:#888;">Cancel Edit</button>
-        <div id="teamStatus" class="status-msg"></div>
-      </form>
-    </div>
-
-    <!-- LIST OF TEAM MEMBERS -->
-    <div class="card-box">
-      <h3>Manage Team Members</h3>
-      <div id="teamList">Loading members...</div>
-    </div>
-
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Dandi CCI">
+    <h1>Dandi CCI Admin</h1>
+    <p class="sub">Sign in to manage the website</p>
+    <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    <button id="loginBtn">Sign In</button>
+    <p class="login-error" id="loginError"></p>
   </div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<!-- ===================== DASHBOARD ===================== -->
+<div class="admin-shell" id="adminShell" style="display:none">
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBowHTWBRUJlYJESKNzCUKwHbIFcBiu-Xc",
-    authDomain: "dandi-cci.firebaseapp.com",
-    projectId: "dandi-cci",
-    storageBucket: "dandi-cci.firebasestorage.app",
-    messagingSenderId: "725172631759",
-    appId: "1:725172631759:web:42d584c0650f8e0d545fba"
-  };
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
+      <span>DANDI CCI</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-panel="home">Home Page</button>
+      <button class="nav-btn" data-panel="about">About Page</button>
+      <button class="nav-btn" data-panel="programs">Programs</button>
+      <button class="nav-btn" data-panel="gallery">Gallery</button>
+      <button class="nav-btn" data-panel="contact">Contact Info</button>
+      <button class="nav-btn" data-panel="donate">Donation Page</button>
+    </nav>
+    <nav>
+      <button class="logout-btn" id="logoutBtn">⎋ Log Out</button>
+    </nav>
+  </aside>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
+  <main class="main">
 
-  // Helper function to handle image uploads to Firebase Storage
-  async function uploadFile(fileInput, folder) {
-    const file = fileInput.files[0];
-    if (!file) return null;
-    const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
-  }
+    <!-- HOME PANEL -->
+    <section class="panel active" id="panel-home">
+      <h2>Home Page</h2>
+      <p class="panel-sub">Edit the headline, subtitle, and impact numbers shown at the top of the homepage.</p>
 
-  // Auth Observer
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      document.getElementById('loginBox').classList.add('hidden');
-      document.getElementById('dashboardPanel').classList.remove('hidden');
-      document.getElementById('logoutBtn').classList.remove('hidden');
-      loadActivities();
-      loadTeam();
-    } else {
-      document.getElementById('loginBox').classList.remove('hidden');
-      document.getElementById('dashboardPanel').classList.add('hidden');
-      document.getElementById('logoutBtn').classList.add('hidden');
-    }
-  });
+      <div class="field-group">
+        <label>Headline</label>
+        <input type="text" id="home-heroTitle" placeholder="Changing Lives, Building Hope">
+      </div>
+      <div class="field-group">
+        <label>Subtitle</label>
+        <textarea id="home-heroSubtitle" placeholder="Short description under the headline"></textarea>
+      </div>
 
-  // Login
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('adminEmail').value;
-    const pass = document.getElementById('adminPass').value;
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (err) {
-      const errTxt = document.getElementById('loginError');
-      errTxt.innerText = "Invalid credentials: " + err.message;
-      errTxt.classList.remove('hidden');
-    }
-  });
+      <div class="field-row">
+        <div class="field-group">
+          <label>Stat 1 Number</label>
+          <input type="text" id="home-stat1Number" placeholder="5,000+">
+        </div>
+        <div class="field-group">
+          <label>Stat 1 Label</label>
+          <input type="text" id="home-stat1Label" placeholder="Lives Impacted">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Stat 2 Number</label>
+          <input type="text" id="home-stat2Number" placeholder="25+">
+        </div>
+        <div class="field-group">
+          <label>Stat 2 Label</label>
+          <input type="text" id="home-stat2Label" placeholder="Communities Reached">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Stat 3 Number</label>
+          <input type="text" id="home-stat3Number" placeholder="7+">
+        </div>
+        <div class="field-group">
+          <label>Stat 3 Label</label>
+          <input type="text" id="home-stat3Label" placeholder="Core Programs">
+        </div>
+      </div>
 
-  // Logout
-  document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+      <button class="save-btn" data-save="home">Save Changes</button>
+      <span class="save-status" id="home-status"></span>
+      <p class="panel-sub" style="margin-top:18px">The "What We Do" cards on the homepage are pulled from the Programs list — edit those on the <strong>Programs</strong> tab.</p>
+    </section>
 
-  // --- ACTIVITIES ---
-  const activityForm = document.getElementById('activityForm');
-  activityForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = document.getElementById('actStatus');
-    const id = document.getElementById('actDocId').value;
-    const title = document.getElementById('actTitle').value;
-    const existingUrl = document.getElementById('actExistingUrl').value;
-    const fileInput = document.getElementById('actFileInput');
+    <!-- ABOUT PANEL -->
+    <section class="panel" id="panel-about">
+      <h2>About Page</h2>
+      <p class="panel-sub">Edit the intro text, mission, vision, leadership team, and the Sallah outreach story.</p>
 
-    try {
-      status.innerText = "Uploading & saving...";
-      let imageUrl = existingUrl;
+      <div class="field-group">
+        <label>"Who We Are" Intro</label>
+        <textarea id="about-intro"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Mission</label>
+        <textarea id="about-mission"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Vision</label>
+        <textarea id="about-vision"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Sallah Story Title</label>
+        <input type="text" id="about-sallahTitle">
+      </div>
+      <div class="field-group">
+        <label>Sallah Story Text</label>
+        <textarea id="about-sallahText"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Sallah Story Image</label>
+        <input type="text" id="about-sallahImage" placeholder="Image URL">
+        <div class="upload-row">
+          <input type="file" id="about-sallahImage-file" accept="image/*">
+          <span class="upload-progress" id="about-sallahImage-progress"></span>
+        </div>
+      </div>
 
-      // Upload new file if selected
-      if (fileInput.files.length > 0) {
-        imageUrl = await uploadFile(fileInput, 'activities');
-      }
+      <button class="save-btn" data-save="about">Save Changes</button>
+      <span class="save-status" id="about-status"></span>
 
-      if (!imageUrl) {
-        alert("Please select an image file.");
-        status.innerText = "";
-        return;
-      }
+      <div class="divider"></div>
 
-      if (id) {
-        await updateDoc(doc(db, "activities", id), { title, imageUrl });
-      } else {
-        await addDoc(collection(db, "activities"), { title, imageUrl, date: new Date().toISOString() });
-      }
+      <h2>Leadership Team</h2>
+      <p class="panel-sub">Add, edit, or remove team members shown on the About page.</p>
+      <div class="item-list" id="team-list"></div>
 
-      status.innerText = "Saved successfully!";
-      setTimeout(() => { status.innerText = ""; }, 3000);
-      resetActForm();
-      loadActivities();
-    } catch (err) {
-      alert("Error saving activity: " + err.message);
-      status.innerText = "";
-    }
-  });
-
-  async function loadActivities() {
-    const list = document.getElementById('activitiesList');
-    try {
-      const q = query(collection(db, "activities"), orderBy("date", "desc"));
-      const snap = await getDocs(q);
-      list.innerHTML = "";
-      
-      if (snap.empty) {
-        list.innerHTML = "<p>No activities added yet.</p>";
-        return;
-      }
-
-      snap.forEach((d) => {
-        const data = d.data();
-        const div = document.createElement('div');
-        div.className = 'item-list-row';
-        div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px;">
-            <img src="${data.imageUrl}">
-            <span><strong>${data.title}</strong></span>
+      <div class="new-item-form">
+        <h4>Add Team Member</h4>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Name</label>
+            <input type="text" id="team-new-name" placeholder="Full name">
           </div>
-          <div>
-            <button class="btn edit-act-btn" style="padding:6px 12px; margin-right:5px;">Edit</button>
-            <button class="btn-danger del-act-btn">Delete</button>
+          <div class="field-group">
+            <label>Role</label>
+            <input type="text" id="team-new-role" placeholder="e.g. Program Manager">
           </div>
-        `;
-
-        div.querySelector('.edit-act-btn').onclick = () => {
-          document.getElementById('actDocId').value = d.id;
-          document.getElementById('actTitle').value = data.title;
-          document.getElementById('actExistingUrl').value = data.imageUrl;
-          document.getElementById('actFormTitle').innerText = "Edit Activity";
-          document.getElementById('actSubmitBtn').innerText = "Update Activity";
-          document.getElementById('actCancelBtn').classList.remove('hidden');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        div.querySelector('.del-act-btn').onclick = async () => {
-          if (confirm("Delete this activity?")) {
-            await deleteDoc(doc(db, "activities", d.id));
-            loadActivities();
-          }
-        };
-
-        list.appendChild(div);
-      });
-    } catch (err) {
-      list.innerHTML = "<p>Error: " + err.message + "</p>";
-    }
-  }
-
-  function resetActForm() {
-    document.getElementById('actDocId').value = "";
-    document.getElementById('actExistingUrl').value = "";
-    activityForm.reset();
-    document.getElementById('actFormTitle').innerText = "Add New Activity / Photo";
-    document.getElementById('actSubmitBtn').innerText = "Save Activity";
-    document.getElementById('actCancelBtn').classList.add('hidden');
-  }
-  document.getElementById('actCancelBtn').onclick = resetActForm;
-
-  // --- TEAM MEMBERS ---
-  const teamForm = document.getElementById('teamForm');
-  teamForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = document.getElementById('teamStatus');
-    const id = document.getElementById('teamDocId').value;
-    const name = document.getElementById('teamName').value;
-    const role = document.getElementById('teamRole').value;
-    const existingUrl = document.getElementById('teamExistingUrl').value;
-    const fileInput = document.getElementById('teamFileInput');
-
-    try {
-      status.innerText = "Uploading & saving...";
-      let imageUrl = existingUrl;
-
-      if (fileInput.files.length > 0) {
-        imageUrl = await uploadFile(fileInput, 'team');
-      }
-
-      if (!imageUrl) {
-        alert("Please select a profile photo.");
-        status.innerText = "";
-        return;
-      }
-
-      if (id) {
-        await updateDoc(doc(db, "team", id), { name, role, imageUrl });
-      } else {
-        await addDoc(collection(db, "team"), { name, role, imageUrl });
-      }
-
-      status.innerText = "Saved successfully!";
-      setTimeout(() => { status.innerText = ""; }, 3000);
-      resetTeamForm();
-      loadTeam();
-    } catch (err) {
-      alert("Error saving member: " + err.message);
-      status.innerText = "";
-    }
-  });
-
-  async function loadTeam() {
-    const list = document.getElementById('teamList');
-    try {
-      const snap = await getDocs(collection(db, "team"));
-      list.innerHTML = "";
-
-      if (snap.empty) {
-        list.innerHTML = "<p>No team members added yet.</p>";
-        return;
-      }
-
-      snap.forEach((d) => {
-        const data = d.data();
-        const div = document.createElement('div');
-        div.className = 'item-list-row';
-        div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px;">
-            <img src="${data.imageUrl}">
-            <div>
-              <strong>${data.name}</strong><br>
-              <small style="color:#666;">${data.role}</small>
-            </div>
+        </div>
+        <div class="field-group">
+          <label>Photo</label>
+          <input type="text" id="team-new-image" placeholder="Image URL">
+          <div class="upload-row">
+            <input type="file" id="team-new-image-file" accept="image/*">
+            <span class="upload-progress" id="team-new-image-progress"></span>
           </div>
-          <div>
-            <button class="btn edit-team-btn" style="padding:6px 12px; margin-right:5px;">Edit</button>
-            <button class="btn-danger del-team-btn">Delete</button>
+        </div>
+        <button class="add-btn" id="team-add-btn">Add Team Member</button>
+      </div>
+    </section>
+
+    <!-- PROGRAMS PANEL -->
+    <section class="panel" id="panel-programs">
+      <h2>Programs</h2>
+      <p class="panel-sub">These show up on both the Programs page and the homepage "What We Do" section.</p>
+
+      <div class="item-list" id="programs-list"></div>
+
+      <div class="new-item-form">
+        <h4>Add Program</h4>
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="program-new-title" placeholder="e.g. Education Support">
+        </div>
+        <div class="field-group">
+          <label>Description</label>
+          <textarea id="program-new-text" placeholder="What does this program do?"></textarea>
+        </div>
+        <div class="field-group">
+          <label>Photo</label>
+          <input type="text" id="program-new-image" placeholder="Image URL">
+          <div class="upload-row">
+            <input type="file" id="program-new-image-file" accept="image/*">
+            <span class="upload-progress" id="program-new-image-progress"></span>
           </div>
-        `;
+        </div>
+        <button class="add-btn" id="program-add-btn">Add Program</button>
+      </div>
+    </section>
 
-        div.querySelector('.edit-team-btn').onclick = () => {
-          document.getElementById('teamDocId').value = d.id;
-          document.getElementById('teamName').value = data.name;
-          document.getElementById('teamRole').value = data.role;
-          document.getElementById('teamExistingUrl').value = data.imageUrl;
-          document.getElementById('teamFormTitle').innerText = "Edit Team Member";
-          document.getElementById('teamSubmitBtn').innerText = "Update Member";
-          document.getElementById('teamCancelBtn').classList.remove('hidden');
-        };
+    <!-- GALLERY PANEL -->
+    <section class="panel" id="panel-gallery">
+      <h2>Gallery</h2>
+      <p class="panel-sub">Photos shown in "Our Impact in Action" on the About page.</p>
 
-        div.querySelector('.del-team-btn').onclick = async () => {
-          if (confirm("Delete this team member?")) {
-            await deleteDoc(doc(db, "team", d.id));
-            loadTeam();
-          }
-        };
+      <div class="item-list" id="gallery-list"></div>
 
-        list.appendChild(div);
-      });
-    } catch (err) {
-      list.innerHTML = "<p>Error: " + err.message + "</p>";
-    }
-  }
+      <div class="new-item-form">
+        <h4>Add Photo</h4>
+        <div class="field-group">
+          <label>Caption</label>
+          <input type="text" id="activity-new-title" placeholder="e.g. School supplies distribution">
+        </div>
+        <div class="field-group">
+          <label>Date</label>
+          <input type="date" id="activity-new-date">
+        </div>
+        <div class="field-group">
+          <label>Photo</label>
+          <input type="text" id="activity-new-image" placeholder="Image URL">
+          <div class="upload-row">
+            <input type="file" id="activity-new-image-file" accept="image/*">
+            <span class="upload-progress" id="activity-new-image-progress"></span>
+          </div>
+        </div>
+        <button class="add-btn" id="activity-add-btn">Add Photo</button>
+      </div>
+    </section>
 
-  function resetTeamForm() {
-    document.getElementById('teamDocId').value = "";
-    document.getElementById('teamExistingUrl').value = "";
-    teamForm.reset();
-    document.getElementById('teamFormTitle').innerText = "Add Leadership Team Member";
-    document.getElementById('teamSubmitBtn').innerText = "Save Member";
-    document.getElementById('teamCancelBtn').classList.add('hidden');
-  }
-  document.getElementById('teamCancelBtn').onclick = resetTeamForm;
-</script>
+    <!-- CONTACT PANEL -->
+    <section class="panel" id="panel-contact">
+      <h2>Contact Info</h2>
+      <p class="panel-sub">Shown on the Contact page and in the footer of every page.</p>
+
+      <div class="field-group">
+        <label>Address</label>
+        <textarea id="contact-address"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Phone</label>
+        <input type="text" id="contact-phone">
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="text" id="contact-email">
+      </div>
+      <div class="field-group">
+        <label>WhatsApp Number (digits only, with country code)</label>
+        <input type="text" id="contact-whatsappNumber" placeholder="2348063182224">
+      </div>
+      <div class="field-group">
+        <label>Google Maps Embed URL</label>
+        <input type="text" id="contact-mapEmbedUrl" placeholder="https://maps.google.com/maps?...&output=embed">
+      </div>
+
+      <button class="save-btn" data-save="contact">Save Changes</button>
+      <span class="save-status" id="contact-status"></span>
+    </section>
+
+    <!-- DONATE PANEL -->
+    <section class="panel" id="panel-donate">
+      <h2>Donation Page</h2>
+      <p class="panel-sub">Edit donation tiers and bank transfer details.</p>
+
+      <div class="field-group">
+        <label>Hero Text</label>
+        <textarea id="donate-heroText"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tier 1 Amount</label>
+          <input type="text" id="donate-tier1Amount" placeholder="₦5,000">
+        </div>
+        <div class="field-group">
+          <label>Tier 1 Description</label>
+          <input type="text" id="donate-tier1Text">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tier 2 Amount</label>
+          <input type="text" id="donate-tier2Amount" placeholder="₦10,000">
+        </div>
+        <div class="field-group">
+          <label>Tier 2 Description</label>
+          <input type="text" id="donate-tier2Text">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tier 3 Amount</label>
+          <input type="text" id="donate-tier3Amount" placeholder="₦25,000">
+        </div>
+        <div class="field-group">
+          <label>Tier 3 Description</label>
+          <input type="text" id="donate-tier3Text">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-group">
+        <label>Bank Name</label>
+        <input type="text" id="donate-bankName">
+      </div>
+      <div class="field-group">
+        <label>Account Name</label>
+        <input type="text" id="donate-accountName">
+      </div>
+      <div class="field-group">
+        <label>Account Number</label>
+        <input type="text" id="donate-accountNumber">
+      </div>
+      <div class="field-group">
+        <label>Reference</label>
+        <input type="text" id="donate-reference">
+      </div>
+
+      <button class="save-btn" data-save="donate">Save Changes</button>
+      <span class="save-status" id="donate-status"></span>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="assets/admin.js"></script>
 </body>
 </html>
