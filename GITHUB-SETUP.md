@@ -15,10 +15,10 @@ Open that file and set:
 
 ```js
 export const githubConfig = {
-  owner: "spibody",              // your GitHub username or org
-  repo: "dandi-cci",             // the repo name
+  owner: "spibodydigitalzhub-create",
+  repo: "Dandi-Concerned-Initiatives",
   branch: "main",
-  pagesBaseUrl: "https://spibody.github.io/dandi-cci", // the URL from step 1
+  pagesBaseUrl: "https://www.dandicci.org",
 };
 ```
 
