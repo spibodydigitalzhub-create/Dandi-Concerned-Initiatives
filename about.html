@@ -150,51 +150,5 @@
 <script src="app.js"></script>
 <script type="module" src="assets/site-content.js"></script>
 
-<!-- FIREBASE SCRIPT TO LOAD GALLERY -->
-<script type="module">
-  import { firebaseConfig } from "./assets/firebase-config.js";
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  async function loadActivities() {
-    const gallery = document.getElementById('activityGallery');
-    try {
-      const q = query(collection(db, "activities"), orderBy("date", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      gallery.innerHTML = "";
-
-      if (querySnapshot.empty) {
-        gallery.innerHTML = "<p style='text-align:center; width:100%;'>No activities added yet. Check back soon!</p>";
-        return;
-      }
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const img = document.createElement('img');
-        img.src = data.imageUrl;
-        img.alt = data.title;
-        img.title = data.title;
-
-        img.style.cursor = "pointer";
-        img.onclick = function () {
-          document.getElementById('lightbox-img').src = this.src;
-          document.getElementById('lightbox').style.display = 'flex';
-        };
-
-        gallery.appendChild(img);
-      });
-    } catch (error) {
-      console.error("Error loading activities:", error);
-      gallery.innerHTML = "<p style='text-align:center; width:100%;'>Error loading activities.</p>";
-    }
-  }
-
-  loadActivities();
-</script>
-
 </body>
 </html>

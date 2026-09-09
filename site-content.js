@@ -1,15 +1,6 @@
-// Loads editable content from Firestore into the public pages.
-// If a document/field doesn't exist yet, the original static HTML stays as-is,
-// so the site never breaks before the owner has entered anything in the admin dashboard.
-
-import { firebaseConfig } from "./firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore, doc, getDoc, collection, getDocs, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Loads editable content from the /data/*.json files in this repo and fills
+// in the page. If a fetch fails (e.g. before the first deploy), the original
+// static HTML already in the page stays as-is, so the site never breaks.
 
 function setText(field, value) {
   if (value === undefined || value === null || value === "") return;
@@ -25,30 +16,29 @@ function setAttr(field, attr, value) {
   });
 }
 
-async function getDocSafe(path) {
+async function getJson(path) {
   try {
-    const snap = await getDoc(doc(db, path));
-    return snap.exists() ? snap.data() : null;
+    // cache: "no-store" so a save in the dashboard shows up on next load
+    // instead of a stale cached copy of the JSON file.
+    const res = await fetch(path, { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
   } catch (e) {
     console.error("Content load error:", path, e);
     return null;
   }
 }
 
-async function getOrderedCollection(name) {
-  try {
-    const q = query(collection(db, name), orderBy("order", "asc"));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => d.data());
-  } catch (e) {
-    console.error("Content load error:", name, e);
-    return [];
-  }
+function escapeHtml(str) {
+  if (str === undefined || str === null) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/"/g, "&quot;");
 }
 
-// Footer contact info + WhatsApp number appear on every page.
 async function loadFooterAndContact() {
-  const contact = await getDocSafe("site/contact");
+  const contact = await getJson("data/contact.json");
   if (!contact) return;
   setText("footerEmail", contact.email);
   setText("footerPhone", contact.phone);
@@ -62,7 +52,7 @@ async function loadFooterAndContact() {
 }
 
 async function loadHome() {
-  const home = await getDocSafe("site/home");
+  const home = await getJson("data/home.json");
   if (home) {
     setText("heroTitle", home.heroTitle);
     setText("heroSubtitle", home.heroSubtitle);
@@ -74,10 +64,11 @@ async function loadHome() {
     setText("stat3Label", home.stat3Label);
   }
 
-  const programs = await getOrderedCollection("programs");
+  const programs = (await getJson("data/programs.json")) || [];
   const container = document.querySelector('[data-list="homeCards"]');
   if (container && programs.length) {
-    container.innerHTML = programs.map(p => `
+    const sorted = [...programs].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    container.innerHTML = sorted.map(p => `
       <div class="card">
         <h3>${escapeHtml(p.title)}</h3>
         <p>${escapeHtml(p.text)}</p>
@@ -87,10 +78,11 @@ async function loadHome() {
 }
 
 async function loadPrograms() {
-  const programs = await getOrderedCollection("programs");
+  const programs = (await getJson("data/programs.json")) || [];
   const container = document.querySelector('[data-list="programsFull"]');
   if (container && programs.length) {
-    container.innerHTML = programs.map(p => `
+    const sorted = [...programs].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    container.innerHTML = sorted.map(p => `
       <div class="card">
         ${p.image ? `<img src="${escapeAttr(p.image)}" alt="${escapeAttr(p.title)}">` : ""}
         <h3>${escapeHtml(p.title)}</h3>
@@ -101,7 +93,7 @@ async function loadPrograms() {
 }
 
 async function loadAbout() {
-  const about = await getDocSafe("site/about");
+  const about = await getJson("data/about.json");
   if (about) {
     setText("aboutIntro", about.intro);
     setText("mission", about.mission);
@@ -111,10 +103,11 @@ async function loadAbout() {
     setAttr("sallahImage", "src", about.sallahImage);
   }
 
-  const team = await getOrderedCollection("team");
-  const container = document.querySelector('[data-list="team"]');
-  if (container && team.length) {
-    container.innerHTML = team.map(m => `
+  const team = (await getJson("data/team.json")) || [];
+  const teamContainer = document.querySelector('[data-list="team"]');
+  if (teamContainer && team.length) {
+    const sorted = [...team].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    teamContainer.innerHTML = sorted.map(m => `
       <div class="card">
         <img src="${escapeAttr(m.image)}" alt="${escapeAttr(m.name)}">
         <h3>${escapeHtml(m.name)}</h3>
@@ -122,10 +115,33 @@ async function loadAbout() {
       </div>
     `).join("");
   }
+
+  const gallery = (await getJson("data/gallery.json")) || [];
+  const galleryEl = document.getElementById("activityGallery");
+  if (galleryEl) {
+    if (!gallery.length) {
+      galleryEl.innerHTML = "<p style='text-align:center; width:100%;'>No activities added yet. Check back soon!</p>";
+    } else {
+      const sorted = [...gallery].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      galleryEl.innerHTML = "";
+      sorted.forEach(item => {
+        const img = document.createElement("img");
+        img.src = item.imageUrl;
+        img.alt = item.title || "";
+        img.title = item.title || "";
+        img.style.cursor = "pointer";
+        img.onclick = function () {
+          document.getElementById("lightbox-img").src = this.src;
+          document.getElementById("lightbox").style.display = "flex";
+        };
+        galleryEl.appendChild(img);
+      });
+    }
+  }
 }
 
 async function loadDonate() {
-  const donate = await getDocSafe("site/donate");
+  const donate = await getJson("data/donate.json");
   if (!donate) return;
   setText("donateHeroText", donate.heroText);
   setText("tier1Amount", donate.tier1Amount);
@@ -138,15 +154,6 @@ async function loadDonate() {
   setText("accountName", donate.accountName);
   setText("accountNumber", donate.accountNumber);
   setText("reference", donate.reference);
-}
-
-function escapeHtml(str) {
-  if (str === undefined || str === null) return "";
-  return String(str)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-function escapeAttr(str) {
-  return escapeHtml(str).replace(/"/g, "&quot;");
 }
 
 const page = document.body.dataset.page;

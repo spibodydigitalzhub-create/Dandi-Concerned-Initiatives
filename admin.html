@@ -6,7 +6,7 @@
 <title>Admin Dashboard - Dandi CCI</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="assets/admin.css">
 </head>
 <body class="admin-body">
 
@@ -15,9 +15,8 @@
   <div class="login-card">
     <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Dandi CCI">
     <h1>Dandi CCI Admin</h1>
-    <p class="sub">Sign in to manage the website</p>
-    <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
-    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    <p class="sub">Paste your access code to manage the website</p>
+    <input type="password" id="loginToken" placeholder="Access code" autocomplete="off">
     <button id="loginBtn">Sign In</button>
     <p class="login-error" id="loginError"></p>
   </div>
@@ -318,6 +317,6 @@
   </main>
 </div>
 
-<script type="module" src="admin.js"></script>
+<script type="module" src="assets/admin.js"></script>
 </body>
 </html>
