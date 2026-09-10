@@ -1,9 +1,0 @@
-[
-  { "title": "Conflict Resolution & Security Sensitization", "text": "We promote peace, unity, and security awareness through community sensitization programs. Our goal is to help prevent conflict, encourage peaceful living, and support safer communities.", "image": "https://i.imgur.com/ucL9wet.jpeg", "order": 0 },
-  { "title": "Education Support", "text": "We provide school supplies, scholarships, and mentorship programs to help children stay in school and succeed.", "image": "https://i.imgur.com/kJIgGdp.jpeg", "order": 1 },
-  { "title": "Food Distribution", "text": "Our team distributes food packages to families facing hardship and hunger in underserved communities.", "image": "https://i.imgur.com/YfDBtr8.jpeg", "order": 2 },
-  { "title": "Healthcare Outreach", "text": "We organize medical outreach programs, providing basic healthcare services and awareness campaigns.", "image": "https://i.imgur.com/LMaQK9j.jpeg", "order": 3 },
-  { "title": "Women Empowerment", "text": "We support women with skills training and small business opportunities to become financially independent.", "image": "https://i.imgur.com/3WaMIua.jpeg", "order": 4 },
-  { "title": "Youth Development", "text": "We run programs that build leadership, digital skills, and career opportunities for young people.", "image": "https://i.imgur.com/mdO03a0.jpeg", "order": 5 },
-  { "title": "Community Projects", "text": "We carry out projects like clean water supply, sanitation, and infrastructure development.", "image": "https://i.imgur.com/gZo1EG6.jpeg", "order": 6 }
-]
