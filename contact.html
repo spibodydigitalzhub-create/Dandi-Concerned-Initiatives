@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact - DANDI CONCERNED CITIZEN INITIATIVES</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body data-page="contact">
+
+<header class="header">
+  <a href="index.html" class="logo">
+    <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
+    <span>DANDI CCI</span>
+  </a>
+
+  <nav id="navMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="programs.html">Programs</a>
+    <a href="donate.html">Donate</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+</header>
+
+<!-- HERO -->
+<section class="hero" style="background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)), url('https://i.imgur.com/6WvNrTs.jpeg') center/cover;">
+  <div class="hero-content">
+    <h1>Contact Us</h1>
+    <p>We'd love to hear from you</p>
+  </div>
+</section>
+
+<!-- CONTACT INFO -->
+<section class="section">
+  <h2>Get In Touch</h2>
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>📍 Address</h3>
+      <p data-field="address">No 1 Tausayi Plaza by General Hospital, Kamba, Kebbi State. Kamba is a Niger-Benin border community in Kebbi State, Nigeria.</p>
+    </div>
+
+    <div class="card">
+      <h3>📞 Phone</h3>
+      <p data-field="phone">+234 806 318 2224</p>
+    </div>
+
+    <div class="card">
+      <h3>📧 Email</h3>
+      <p data-field="email">dandiconcernedcitizenscci@gmail.com</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT FORM -->
+<section class="section">
+  <h2>Send Us a Message</h2>
+
+  <form class="contact-form">
+    <input type="text" placeholder="Your Name" required>
+    <input type="email" placeholder="Your Email" required>
+    <input type="text" placeholder="Subject" required>
+    <textarea placeholder="Your Message" required></textarea>
+    <button type="submit" class="btn">Send Message</button>
+  </form>
+</section>
+
+<!-- MAP -->
+<section class="section">
+  <h2>Our Location</h2>
+
+  <div style="max-width: 800px; margin: auto;">
+    <iframe
+      data-field="mapEmbed"
+      src="https://maps.google.com/maps?q=lagos&t=&z=13&ie=UTF8&iwloc=&output=embed"
+      width="100%"
+      height="300"
+      style="border:0;">
+    </iframe>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Dandi Concerned Citizen Initiatives</h3>
+  <p>Email: <span data-field="footerEmail">dandiconcernedcitizenscci@gmail.com</span></p>
+  <p>Phone: <span data-field="footerPhone">+234 806 318 2224</span></p>
+  <p>&copy; 2026 Dandi Concerned Citizen Initiatives. All Rights Reserved.</p>
+</footer>
+
+<a href="#" id="openWhatsapp" class="whatsapp">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<div class="wa-popup" id="waPopup">
+  <div class="wa-box">
+    <button class="wa-close" id="closeWhatsapp">&times;</button>
+    <h3>Chat With Us</h3>
+    <p>Enter your name to continue on WhatsApp.</p>
+
+    <input type="text" id="waName" placeholder="Your name">
+
+    <button id="startWhatsapp" class="wa-btn">Start Chat</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script type="module" src="site-content.js"></script>
+</body>
+</html>

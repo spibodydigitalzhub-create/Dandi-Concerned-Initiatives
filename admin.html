@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Dandi CCI</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Dandi CCI">
+    <h1>Dandi CCI Admin</h1>
+    <p class="sub">Paste your access code to manage the website</p>
+    <input type="password" id="loginToken" placeholder="Access code" autocomplete="off">
+    <button id="loginBtn">Sign In</button>
+    <p class="login-error" id="loginError"></p>
+  </div>
+</div>
+
+<!-- ===================== DASHBOARD ===================== -->
+<div class="admin-shell" id="adminShell" style="display:none">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="https://i.imgur.com/ipDyGwg.jpeg" alt="Logo">
+      <span>DANDI CCI</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-panel="home">Home Page</button>
+      <button class="nav-btn" data-panel="about">About Page</button>
+      <button class="nav-btn" data-panel="programs">Programs</button>
+      <button class="nav-btn" data-panel="gallery">Gallery</button>
+      <button class="nav-btn" data-panel="contact">Contact Info</button>
+      <button class="nav-btn" data-panel="donate">Donation Page</button>
+    </nav>
+    <nav>
+      <button class="logout-btn" id="logoutBtn">⎋ Log Out</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- HOME PANEL -->
+    <section class="panel active" id="panel-home">
+      <h2>Home Page</h2>
+      <p class="panel-sub">Edit the headline, subtitle, and impact numbers shown at the top of the homepage.</p>
+
+      <div class="field-group">
+        <label>Headline</label>
+        <input type="text" id="home-heroTitle" placeholder="Changing Lives, Building Hope">
+      </div>
+      <div class="field-group">
+        <label>Subtitle</label>
+        <textarea id="home-heroSubtitle" placeholder="Short description under the headline"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Stat 1 Number</label>
+          <input type="text" id="home-stat1Number" placeholder="5,000+">
+        </div>
+        <div class="field-group">
+          <label>Stat 1 Label</label>
+          <input type="text" id="home-stat1Label" placeholder="Lives Impacted">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Stat 2 Number</label>
+          <input type="text" id="home-stat2Number" placeholder="25+">
+        </div>
+        <div class="field-group">
+          <label>Stat 2 Label</label>
+          <input type="text" id="home-stat2Label" placeholder="Communities Reached">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Stat 3 Number</label>
+          <input type="text" id="home-stat3Number" placeholder="7+">
+        </div>
+        <div class="field-group">
+          <label>Stat 3 Label</label>
+          <input type="text" id="home-stat3Label" placeholder="Core Programs">
+        </div>
+      </div>
+
+      <button class="save-btn" data-save="home">Save Changes</button>
+      <span class="save-status" id="home-status"></span>
+      <p class="panel-sub" style="margin-top:18px">The "What We Do" cards on the homepage are pulled from the Programs list — edit those on the <strong>Programs</strong> tab.</p>
+    </section>
+
+    <!-- ABOUT PANEL -->
+    <section class="panel" id="panel-about">
+      <h2>About Page</h2>
+      <p class="panel-sub">Edit the intro text, mission, vision, leadership team, and the Sallah outreach story.</p>
+
+      <div class="field-group">
+        <label>"Who We Are" Intro</label>
+        <textarea id="about-intro"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Mission</label>
+        <textarea id="about-mission"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Vision</label>
+        <textarea id="about-vision"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Sallah Story Title</label>
+        <input type="text" id="about-sallahTitle">
+      </div>
+      <div class="field-group">
+        <label>Sallah Story Text</label>
+        <textarea id="about-sallahText"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Sallah Story Image</label>
+        <input type="text" id="about-sallahImage" placeholder="Image URL">
+        <div class="upload-row">
+          <input type="file" id="about-sallahImage-file" accept="image/*">
+          <span class="upload-progress" id="about-sallahImage-progress"></span>
+        </div>
+      </div>
+
+      <button class="save-btn" data-save="about">Save Changes</button>
+      <span class="save-status" id="about-status"></span>
+
+      <div class="divider"></div>
+
+      <h2>Leadership Team</h2>
+      <p class="panel-sub">Add, edit, or remove team members shown on the About page.</p>
+      <div class="item-list" id="team-list"></div>
+
+      <div class="new-item-form">
+        <h4>Add Team Member</h4>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Name</label>
+            <input type="text" id="team-new-name" placeholder="Full name">
+          </div>
+          <div class="field-group">
+            <label>Role</label>
+            <input type="text" id="team-new-role" placeholder="e.g. Program Manager">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Photo</label>
+          <input type="text" id="team-new-image" placeholder="Image URL">
+          <div class="upload-row">
+            <input type="file" id="team-new-image-file" accept="image/*">
+            <span class="upload-progress" id="team-new-image-progress"></span>
+          </div>
+        </div>
+        <button class="add-btn" id="team-add-btn">Add Team Member</button>
+      </div>
+    </section>
+
+    <!-- PROGRAMS PANEL -->
+    <section class="panel" id="panel-programs">
+      <h2>Programs</h2>
+      <p class="panel-sub">These show up on both the Programs page and the homepage "What We Do" section.</p>
+
+      <div class="item-list" id="programs-list"></div>
+
+      <div class="new-item-form">
+        <h4>Add Program</h4>
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="program-new-title" placeholder="e.g. Education Support">
+        </div>
+        <div class="field-group">
+          <label>Description</label>
+          <textarea id="program-new-text" placeholder="What does this program do?"></textarea>
+        </div>
+        <div class="field-group">
+          <label>Photo</label>
+          <input type="text" id="program-new-image" placeholder="Image URL">
+          <div class="upload-row">
+            <input type="file" id="program-new-image-file" accept="image/*">
+            <span class="upload-progress" id="program-new-image-progress"></span>
+          </div>
+        </div>
+        <button class="add-btn" id="program-add-btn">Add Program</button>
+      </div>
+    </section>
+
+    <!-- GALLERY PANEL -->
+    <section class="panel" id="panel-gallery">
+      <h2>Gallery</h2>
+      <p class="panel-sub">Photos shown in "Our Impact in Action" on the About page.</p>
+
+      <div class="item-list" id="gallery-list"></div>
+
+      <div class="new-item-form">
+        <h4>Add Photo</h4>
+        <div class="field-group">
+          <label>Caption</label>
+          <input type="text" id="activity-new-title" placeholder="e.g. School supplies distribution">
+        </div>
+        <div class="field-group">
+          <label>Date</label>
+          <input type="date" id="activity-new-date">
+        </div>
+        <div class="field-group">
+          <label>Photo</label>
+          <input type="text" id="activity-new-image" placeholder="Image URL">
+          <div class="upload-row">
+            <input type="file" id="activity-new-image-file" accept="image/*">
+            <span class="upload-progress" id="activity-new-image-progress"></span>
+          </div>
+        </div>
+        <button class="add-btn" id="activity-add-btn">Add Photo</button>
+      </div>
+    </section>
+
+    <!-- CONTACT PANEL -->
+    <section class="panel" id="panel-contact">
+      <h2>Contact Info</h2>
+      <p class="panel-sub">Shown on the Contact page and in the footer of every page.</p>
+
+      <div class="field-group">
+        <label>Address</label>
+        <textarea id="contact-address"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Phone</label>
+        <input type="text" id="contact-phone">
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="text" id="contact-email">
+      </div>
+      <div class="field-group">
+        <label>WhatsApp Number (digits only, with country code)</label>
+        <input type="text" id="contact-whatsappNumber" placeholder="2348063182224">
+      </div>
+      <div class="field-group">
+        <label>Google Maps Embed URL</label>
+        <input type="text" id="contact-mapEmbedUrl" placeholder="https://maps.google.com/maps?...&output=embed">
+      </div>
+
+      <button class="save-btn" data-save="contact">Save Changes</button>
+      <span class="save-status" id="contact-status"></span>
+    </section>
+
+    <!-- DONATE PANEL -->
+    <section class="panel" id="panel-donate">
+      <h2>Donation Page</h2>
+      <p class="panel-sub">Edit donation tiers and bank transfer details.</p>
+
+      <div class="field-group">
+        <label>Hero Text</label>
+        <textarea id="donate-heroText"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tier 1 Amount</label>
+          <input type="text" id="donate-tier1Amount" placeholder="₦5,000">
+        </div>
+        <div class="field-group">
+          <label>Tier 1 Description</label>
+          <input type="text" id="donate-tier1Text">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tier 2 Amount</label>
+          <input type="text" id="donate-tier2Amount" placeholder="₦10,000">
+        </div>
+        <div class="field-group">
+          <label>Tier 2 Description</label>
+          <input type="text" id="donate-tier2Text">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Tier 3 Amount</label>
+          <input type="text" id="donate-tier3Amount" placeholder="₦25,000">
+        </div>
+        <div class="field-group">
+          <label>Tier 3 Description</label>
+          <input type="text" id="donate-tier3Text">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-group">
+        <label>Bank Name</label>
+        <input type="text" id="donate-bankName">
+      </div>
+      <div class="field-group">
+        <label>Account Name</label>
+        <input type="text" id="donate-accountName">
+      </div>
+      <div class="field-group">
+        <label>Account Number</label>
+        <input type="text" id="donate-accountNumber">
+      </div>
+      <div class="field-group">
+        <label>Reference</label>
+        <input type="text" id="donate-reference">
+      </div>
+
+      <button class="save-btn" data-save="donate">Save Changes</button>
+      <span class="save-status" id="donate-status"></span>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
