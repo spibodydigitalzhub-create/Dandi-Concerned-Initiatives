@@ -98,9 +98,12 @@ async function validateToken(token) {
   const res = await fetch(`${API_BASE}/repos/${githubConfig.owner}/${githubConfig.repo}`, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
   });
-  if (!res.ok) return false;
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const detail = body.message ? ` — GitHub says: "${body.message}"` : "";
+    throw new Error(`GitHub returned ${res.status}${detail}`);
+  }
   const data = await res.json();
-  // Needs write access to actually save changes.
   return !data.permissions || data.permissions.push !== false;
 }
 
@@ -147,7 +150,7 @@ async function handleLogin() {
   try {
     const ok = await validateToken(token);
     if (!ok) {
-      errorEl.textContent = "That code doesn't work — check it's correct and has write access to this repo.";
+      errorEl.textContent = "Signed in, but this token doesn't have write access to the repo.";
       return;
     }
     TOKEN = token;
@@ -156,7 +159,7 @@ async function handleLogin() {
     showDashboard();
   } catch (e) {
     console.error(e);
-    errorEl.textContent = "Couldn't reach GitHub. Check your connection and try again.";
+    errorEl.textContent = e.message || "Couldn't reach GitHub. Check your connection and try again.";
   }
 }
 
